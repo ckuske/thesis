@@ -6,7 +6,6 @@
 # keep track of the locations of the inconsistent
 
 import fractions
-from Tkinter import *
 
 dataList = []  # list of lists
 matrixSquares = []
@@ -44,26 +43,38 @@ class PairwiseMatrix:
         return self.matrixData[x][y]
 
     def GetDistance(self, oMatrix):
-        n = oMatrix.GetSize()
+        totalDistance = 0.0
         for i in range(0, self.matrixSize):
             for j in range(0, self.matrixSize):
 
-                difference = 0
-                thisMatrixTuple = ParseFraction(self.GetItem(i,j))
-                otherMatrixTuple = ParseFraction(oMatrix.GetItem(i, j))
+                thisMatrixTuple = list(ParseFraction(self.GetItem(i, j)))
+                otherMatrixTuple = list(ParseFraction(oMatrix.GetItem(i, j)))
 
                 #if thisMatrixTuple[0] == thisMatrixTuple[1]
 
-                if thisMatrixTuple[0] == thisMatrixTuple[1]:
+                if thisMatrixTuple[1] != otherMatrixTuple[1]:  # find common denominator
+                    a = int(thisMatrixTuple[1])
+                    b = int(otherMatrixTuple[1])
+                    common_divisor = fractions.gcd(a, b)
+                    lcd = ((a * b) / common_divisor)
+                    thisMatrixTuple[0] = str(int(thisMatrixTuple[0]) * (lcd / a))
+                    thisMatrixTuple[1] = str(lcd)
+                    otherMatrixTuple[0] = str(int(otherMatrixTuple[0]) * (lcd / b))
+                    otherMatrixTuple[1] = str(lcd)
+                    difference = abs((float(thisMatrixTuple[0]) - float(otherMatrixTuple[0])) / lcd)
+                elif thisMatrixTuple[0] == thisMatrixTuple[1]:
                     difference = abs(int(thisMatrixTuple[0])) - int(otherMatrixTuple[0])
                 else:
                     difference = abs(int(thisMatrixTuple[0]) - int(otherMatrixTuple[0]))
 
-                print "Difference [" + str(i) + "," + str(j) + "]= " + str(abs(difference))
+                totalDistance += abs(difference)
+
+                # print "Difference [" + str(i) + "," + str(j) + "]= " + str(abs(difference))
+        return totalDistance
 
 def ParseFraction(inputStr):
     fractionParts = inputStr.split('/')
-    if(len(fractionParts) == 2):
+    if len(fractionParts) == 2:
         return fractionParts[0], fractionParts[1]
     return fractionParts[0], fractionParts[0]
 
@@ -83,9 +94,8 @@ def SimplifyFraction(inputStr):
 
 def ParseInput():
     global matrixInputSquares
-    row = []
-    str = '1 3 5;2/6 1 10/6;1/5 3/5 1'
-    rows = str.split(';')
+    matrixStr = '1 3 5;2/6 1 10/6;1/5 3/5 1'
+    rows = matrixStr.split(';')
     print "Original Input:"
     for i in range(0, len(rows)):
         row = rows[i].split()
@@ -95,8 +105,8 @@ def ParseInput():
     for i in range(0, len(rows)):
         row = rows[i].split()
         for j in range(0, len(row)):
-            str = SimplifyFraction(row[j])
-            row[j] = str
+            matrixStr = SimplifyFraction(row[j])
+            row[j] = matrixStr
         matrixInputSquares.append(row)
 
 
@@ -230,7 +240,9 @@ if __name__ == "__main__":
     p2.AddMatrixRow(['7','8','1'])
     p2.PrintMatrix()
 
-    p2.GetDistance(p)
+    distance = p2.GetDistance(p)
+
+    print "Total Distance between matrices = " + str(distance)
 
     # root = Tk()
     # ParseInput()
