@@ -53,17 +53,24 @@ class PairwiseMatrix:
                 #if thisMatrixTuple[0] == thisMatrixTuple[1]
 
                 if thisMatrixTuple[1] != otherMatrixTuple[1]:  # find common denominator
+                    lcd = 1
                     a = int(thisMatrixTuple[1])
                     b = int(otherMatrixTuple[1])
                     common_divisor = fractions.gcd(a, b)
-                    lcd = ((a * b) / common_divisor)
-                    thisMatrixTuple[0] = str(int(thisMatrixTuple[0]) * (lcd / a))
-                    thisMatrixTuple[1] = str(lcd)
-                    otherMatrixTuple[0] = str(int(otherMatrixTuple[0]) * (lcd / b))
-                    otherMatrixTuple[1] = str(lcd)
+                    if thisMatrixTuple[0] != thisMatrixTuple[1]:  # if it's not a whole number
+                        lcd = ((a * b) / common_divisor)
+                        thisMatrixTuple[0] = str(int(thisMatrixTuple[0]) * (lcd / a))
+                        thisMatrixTuple[1] = str(lcd)
+
+                    if otherMatrixTuple[0] != otherMatrixTuple[1]:  # if it's not a whole number
+                        lcd = ((a * b) / common_divisor)
+                        otherMatrixTuple[0] = str(int(otherMatrixTuple[0]) * (lcd / b))
+                        otherMatrixTuple[1] = str(lcd)
+
                     difference = abs((float(thisMatrixTuple[0]) - float(otherMatrixTuple[0])) / lcd)
                 else:
-                    difference = abs(int(thisMatrixTuple[0]) - int(otherMatrixTuple[0]))
+                    lcd = int(thisMatrixTuple[1])
+                    difference = abs((float(thisMatrixTuple[0]) - float(otherMatrixTuple[0])) / lcd)
 
                 totalDistance += abs(difference)
 
@@ -227,15 +234,15 @@ if __name__ == "__main__":
     #1 3 5;2/6 1 10/6;1/5 3/5 1
     p = PairwiseMatrix()
     p.AddMatrixRow(['1','3','5'])
-    p.AddMatrixRow(['2/6','1','10/6'])
+    p.AddMatrixRow(['1/3', '1', '10/6'])
     p.AddMatrixRow(['1/5','3/5','1'])
     p.PrintMatrix()
 
 
     p2 = PairwiseMatrix()
-    p2.AddMatrixRow(['1','2','3'])
-    p2.AddMatrixRow(['4','1','6'])
-    p2.AddMatrixRow(['7','8','1'])
+    p2.AddMatrixRow(['1', '3', '5'])
+    p2.AddMatrixRow(['1/3', '2', '9/6'])
+    p2.AddMatrixRow(['1/5', '7/10', '1'])
     p2.PrintMatrix()
 
     distance = p2.GetDistance(p)
