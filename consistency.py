@@ -62,8 +62,6 @@ class PairwiseMatrix:
                     otherMatrixTuple[0] = str(int(otherMatrixTuple[0]) * (lcd / b))
                     otherMatrixTuple[1] = str(lcd)
                     difference = abs((float(thisMatrixTuple[0]) - float(otherMatrixTuple[0])) / lcd)
-                elif thisMatrixTuple[0] == thisMatrixTuple[1]:
-                    difference = abs(int(thisMatrixTuple[0])) - int(otherMatrixTuple[0])
                 else:
                     difference = abs(int(thisMatrixTuple[0]) - int(otherMatrixTuple[0]))
 
