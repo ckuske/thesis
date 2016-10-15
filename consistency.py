@@ -42,8 +42,69 @@ class PairwiseMatrix:
             return ""
         return self.matrixData[x][y]
 
+    def CheckMatrixDiagonal(self):
+        for i in range(0, self.matrixSize):
+            if int(self.GetItem(i, i)) != 1:
+                return False
+        return True
+
+    def CheckMatrixConsistency(self):
+        n = self.matrixSize
+        for i in range(0, n):
+            for j in range(0, n):
+                for k in range(0, n):
+
+                    if i == j:
+                        matrixSquares[i][j].config(text="1")
+                        # continue
+
+                    print "i=" + str(i) + ", j=" + str(j) + ", k=" + str(k) + " -> " + \
+                          str(self.GetItem(i, k)) + "[" + str(i) + "," + str(k) + "] * " + str(
+                        self.GetItem(k, j)) + "[" + str(
+                        k) + "," + str(j) + "] should be " + str(self.GetItem(i, j))
+
+                    (ijNum, ijDenom) = GetNumeratorDenominator(self.GetItem(i, j))
+                    (ikNum, ikDenom) = GetNumeratorDenominator(self.GetItem(i, k))
+                    (kjNum, kjDenom) = GetNumeratorDenominator(self.GetItem(k, j))
+                    print(ijNum, ijDenom)
+                    print(ikNum, ikDenom)
+                    print(kjNum, kjDenom)
+
+                    ijTop = (int(ikNum) * int(kjNum))
+                    ijBottom = int(ikDenom) * int(kjDenom)
+
+                    (a, b) = simplify_fraction(ijTop, ijBottom)
+
+                    if (int(a) != int(ijNum)) and (int(b) != int(ijDenom)):
+                        print "A=" + str(a)
+                        print "B=" + str(b)
+                        print "ijNum=" + str(ijNum)
+                        print "ijDenom=" + str(ijDenom)
+                        return False
+
+                    matrixSquares[i][j].config(bg="#ff0000")  # red
+                    matrixSquares[i][k].config(bg="#ffff00")  # yellow
+                    matrixSquares[k][j].config(bg="#00ff00")  # green
+                    root.update()
+                    root.update_idletasks()
+                    # time.sleep(1)
+                    #
+
+                    root.update()
+                    root.update_idletasks()
+
+                    matrixSquares[i][j].config(bg="#ffffff")
+                    matrixSquares[i][k].config(bg="#ffffff")
+                    matrixSquares[k][j].config(bg="#ffffff")
+                    root.update()
+                    root.update_idletasks()
+                    print ""
+
+        return True
+
     def GetDistance(self, oMatrix):
         totalDistance = 0.0
+        differencesNoted = 0
         for i in range(0, self.matrixSize):
             for j in range(0, self.matrixSize):
 
@@ -72,10 +133,12 @@ class PairwiseMatrix:
                     lcd = int(thisMatrixTuple[1])
                     difference = abs((float(thisMatrixTuple[0]) - float(otherMatrixTuple[0])) / lcd)
 
-                totalDistance += abs(difference)
+                if (difference != 0):
+                    totalDistance += abs(difference)
+                    differencesNoted += 1
 
                 # print "Difference [" + str(i) + "," + str(j) + "]= " + str(abs(difference))
-        return totalDistance
+        return (totalDistance, differencesNoted)
 
 def ParseFraction(inputStr):
     fractionParts = inputStr.split('/')
@@ -143,60 +206,6 @@ def GetNumeratorDenominator(fractionStr):
         return items[0], items[1]
 
 
-def CheckMatrixConsistency(n):
-    global matrixSquares
-    for i in range(0, n):
-        for j in range(0, n):
-            for k in range(0, n):
-
-                if i == j:
-                    matrixSquares[i][j].config(text="1")
-                    # continue
-
-                print "i=" + str(i) + ", j=" + str(j) + ", k=" + str(k) + " -> " + \
-                      str(matrixInputSquares[i][k]) + "[" + str(i) + "," + str(k) + "] * " + str(
-                    matrixInputSquares[k][j]) + "[" + str(
-                    k) + "," + str(j) + "] should be " + str(matrixInputSquares[i][j])
-
-                (ijNum, ijDenom) = GetNumeratorDenominator(matrixInputSquares[i][j])
-                (ikNum, ikDenom) = GetNumeratorDenominator(matrixInputSquares[i][k])
-                (kjNum, kjDenom) = GetNumeratorDenominator(matrixInputSquares[k][j])
-                print(ijNum, ijDenom)
-                print(ikNum, ikDenom)
-                print(kjNum, kjDenom)
-
-                ijTop = (int(ikNum) * int(kjNum))
-                ijBottom = int(ikDenom) * int(kjDenom)
-
-                (a, b) = simplify_fraction(ijTop, ijBottom)
-
-                if (int(a) != int(ijNum)) and (int(b) != int(ijDenom)):
-                    print "A=" + str(a)
-                    print "B=" + str(b)
-                    print "ijNum=" + str(ijNum)
-                    print "ijDenom=" + str(ijDenom)
-                    return False
-
-                matrixSquares[i][j].config(bg="#ff0000")  # red
-                matrixSquares[i][k].config(bg="#ffff00")  # yellow
-                matrixSquares[k][j].config(bg="#00ff00")  # green
-                root.update()
-                root.update_idletasks()
-                # time.sleep(1)
-                #
-
-                root.update()
-                root.update_idletasks()
-
-                matrixSquares[i][j].config(bg="#ffffff")
-                matrixSquares[i][k].config(bg="#ffffff")
-                matrixSquares[k][j].config(bg="#ffffff")
-                root.update()
-                root.update_idletasks()
-                print ""
-
-    return True
-
 
 # check that Dij = Dik * Dkj
 
@@ -241,13 +250,14 @@ if __name__ == "__main__":
 
     p2 = PairwiseMatrix()
     p2.AddMatrixRow(['1', '3', '5'])
-    p2.AddMatrixRow(['1/3', '2', '9/6'])
-    p2.AddMatrixRow(['1/5', '7/10', '1'])
+    p2.AddMatrixRow(['1/3', '1', '10/6'])
+    p2.AddMatrixRow(['1/5', '6/10', '1'])
     p2.PrintMatrix()
 
-    distance = p2.GetDistance(p)
+    print "Matrix Diagonal Is 'Good': " + str(p.CheckMatrixDiagonal())
 
-    print "Total Distance between matrices = " + str(distance)
+    distanceTup = p2.GetDistance(p)
+    print "Total Distance between matrices = " + str(distanceTup[0]) + ", differences = " + str(distanceTup[1])
 
     # root = Tk()
     # ParseInput()
@@ -286,10 +296,3 @@ if __name__ == "__main__":
 #     print a[0]
 #     return a[0]
 
-# def CheckMatrixDiagonal():
-#     global matrix
-#     diagonals = matrix.diagonal()
-#     for i in range(0, len(diagonals.A1)):
-#         if int(diagonals.A1[i]) != 1:
-#             return False
-#     return True
