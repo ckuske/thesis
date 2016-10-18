@@ -1,9 +1,15 @@
-# next goal is to implement the function for difference between matrices, is by using the absolute value of the difference between each pair of
-# items, and adding each difference between each pair
-# could also use the max of all the difference
-
 # start with a known consistent matrix and then measure the number of inconsistnc detected. (and how does it scale with the size of the matrix)
-# keep track of the locations of the inconsistent
+# keep track of the locations of the inconsistent items
+
+# besides the direct check of 'b', how many other cycles is 'b' involved in (where it is the Aik or Ajk)
+
+# if one item is changed, 'b', how many other consistyency checks would then fail.  It is more n^2
+
+# 3n of the items will include 'b'
+
+# take matrix full of ones
+# computer difference between other matrix and matrix full of ones
+# use the place with the largest diff between ones matrix and other matrix
 
 import fractions
 
@@ -19,6 +25,9 @@ class PairwiseMatrix:
     def __init__(self):
         self.matrixData = []
         self.matrixSize = 0
+
+    def setWindowRoot(self, root):
+        self.root = root
 
     def AddMatrixRow(self, newRow):
         self.matrixData.append(newRow)
@@ -49,26 +58,28 @@ class PairwiseMatrix:
         return True
 
     def CheckMatrixConsistency(self):
+
         n = self.matrixSize
+
         for i in range(0, n):
             for j in range(0, n):
                 for k in range(0, n):
 
-                    if i == j:
-                        matrixSquares[i][j].config(text="1")
+                    # if i == j:
+                    #    matrixSquares[i][j].config(text="1")
                         # continue
 
-                    print "i=" + str(i) + ", j=" + str(j) + ", k=" + str(k) + " -> " + \
-                          str(self.GetItem(i, k)) + "[" + str(i) + "," + str(k) + "] * " + str(
-                        self.GetItem(k, j)) + "[" + str(
-                        k) + "," + str(j) + "] should be " + str(self.GetItem(i, j))
+                    # print "i=" + str(i) + ", j=" + str(j) + ", k=" + str(k) + " -> " + \
+                    #       str(self.GetItem(i, k)) + "[" + str(i) + "," + str(k) + "] * " + str(
+                    #     self.GetItem(k, j)) + "[" + str(
+                    #     k) + "," + str(j) + "] should be " + str(self.GetItem(i, j))
 
                     (ijNum, ijDenom) = GetNumeratorDenominator(self.GetItem(i, j))
                     (ikNum, ikDenom) = GetNumeratorDenominator(self.GetItem(i, k))
                     (kjNum, kjDenom) = GetNumeratorDenominator(self.GetItem(k, j))
-                    print(ijNum, ijDenom)
-                    print(ikNum, ikDenom)
-                    print(kjNum, kjDenom)
+                    # print(ijNum, ijDenom)
+                    # print(ikNum, ikDenom)
+                    # print(kjNum, kjDenom)
 
                     ijTop = (int(ikNum) * int(kjNum))
                     ijBottom = int(ikDenom) * int(kjDenom)
@@ -82,23 +93,7 @@ class PairwiseMatrix:
                         print "ijDenom=" + str(ijDenom)
                         return False
 
-                    matrixSquares[i][j].config(bg="#ff0000")  # red
-                    matrixSquares[i][k].config(bg="#ffff00")  # yellow
-                    matrixSquares[k][j].config(bg="#00ff00")  # green
-                    root.update()
-                    root.update_idletasks()
-                    # time.sleep(1)
-                    #
-
-                    root.update()
-                    root.update_idletasks()
-
-                    matrixSquares[i][j].config(bg="#ffffff")
-                    matrixSquares[i][k].config(bg="#ffffff")
-                    matrixSquares[k][j].config(bg="#ffffff")
-                    root.update()
-                    root.update_idletasks()
-                    print ""
+                        # print ""
 
         return True
 
@@ -188,13 +183,13 @@ def simplify_fraction(numer, denom):
     # Note that reduced_den > 0 as documented in the gcd function.
 
     if reduced_den == 1:  #
-        print "%d/%d is simplified to %d" % (numer, denom, reduced_num)
+        #print "%d/%d is simplified to %d" % (numer, denom, reduced_num)
         return reduced_num, reduced_den
     elif common_divisor == 1:
-        print "%d/%d is already at its most simplified state" % (numer, denom)
+        #print "%d/%d is already at its most simplified state" % (numer, denom)
         return numer, denom
     else:
-        print "%d/%d is simplified to %d/%d" % (numer, denom, reduced_num, reduced_den)
+        #print "%d/%d is simplified to %d/%d" % (numer, denom, reduced_num, reduced_den)
         return reduced_num, reduced_den
 
 
@@ -204,6 +199,61 @@ def GetNumeratorDenominator(fractionStr):
         return fractionStr, '1'
     else:
         return items[0], items[1]
+
+    def CheckMatrixConsistency(self):
+        n = self.matrixSize
+        for i in range(0, n):
+            for j in range(0, n):
+                for k in range(0, n):
+
+                    if i == j:
+                        matrixSquares[i][j].config(text="1")
+                        # continue
+
+                    print "i=" + str(i) + ", j=" + str(j) + ", k=" + str(k) + " -> " + \
+                          str(self.GetItem(i, k)) + "[" + str(i) + "," + str(k) + "] * " + str(
+                        self.GetItem(k, j)) + "[" + str(
+                        k) + "," + str(j) + "] should be " + str(self.GetItem(i, j))
+
+                    (ijNum, ijDenom) = GetNumeratorDenominator(self.GetItem(i, j))
+                    (ikNum, ikDenom) = GetNumeratorDenominator(self.GetItem(i, k))
+                    (kjNum, kjDenom) = GetNumeratorDenominator(self.GetItem(k, j))
+                    print(ijNum, ijDenom)
+                    print(ikNum, ikDenom)
+                    print(kjNum, kjDenom)
+
+                    ijTop = (int(ikNum) * int(kjNum))
+                    ijBottom = int(ikDenom) * int(kjDenom)
+
+                    (a, b) = simplify_fraction(ijTop, ijBottom)
+
+                    if (int(a) != int(ijNum)) and (int(b) != int(ijDenom)):
+                        print "A=" + str(a)
+                        print "B=" + str(b)
+                        print "ijNum=" + str(ijNum)
+                        print "ijDenom=" + str(ijDenom)
+                        return False
+
+                    matrixSquares[i][j].config(bg="#ff0000")  # red
+                    matrixSquares[i][k].config(bg="#ffff00")  # yellow
+                    matrixSquares[k][j].config(bg="#00ff00")  # green
+                    root.update()
+                    root.update_idletasks()
+                    # time.sleep(1)
+                    #
+
+                    self.root.update()
+                    self.root.update_idletasks()
+
+                    matrixSquares[i][j].config(bg="#ffffff")
+                    matrixSquares[i][k].config(bg="#ffffff")
+                    matrixSquares[k][j].config(bg="#ffffff")
+                    root.update()
+                    root.update_idletasks()
+                    print ""
+
+        return True
+
 
 
 
@@ -215,10 +265,18 @@ def callback():
     # if not CheckMatrixDiagonal():
     #     print "Matrix not consistent (diagonal).  Exiting!"
     #     exit()
-    if not CheckMatrixConsistency(len(matrixInputSquares)):
-        print "Matrix not consistent.  Exiting!"
-        exit()
-    print "\nMatrix is consistent."
+    p.setWindowRoot(root)
+    center(root)
+    p.CheckMatrixConsistency()
+    # if p.CheckMatrixConsistency():
+    #     middle.config(text="Consistent!")
+    # else:
+    #     middle.config(text="Not Consistent")
+    # root.update()
+    # if not CheckMatrixConsistency(len(matrixInputSquares)):
+    #     print "Matrix not consistent.  Exiting!"
+    #     exit()
+    # print "\nMatrix is consistent."
 
 def center(win):
     """
@@ -242,40 +300,55 @@ if __name__ == "__main__":
 
     #1 3 5;2/6 1 10/6;1/5 3/5 1
     p = PairwiseMatrix()
-    p.AddMatrixRow(['1','3','5'])
-    p.AddMatrixRow(['1/3', '1', '10/6'])
+    p.AddMatrixRow(['1','3', '5'])
+    p.AddMatrixRow(['1/3', '1', '5/3'])
     p.AddMatrixRow(['1/5','3/5','1'])
     p.PrintMatrix()
 
 
     p2 = PairwiseMatrix()
-    p2.AddMatrixRow(['1', '3', '5'])
+    p2.AddMatrixRow(['2', '3', '5'])
     p2.AddMatrixRow(['1/3', '1', '10/6'])
-    p2.AddMatrixRow(['1/5', '6/10', '1'])
+    p2.AddMatrixRow(['1/5', '7/10', '1'])
     p2.PrintMatrix()
 
     print "Matrix Diagonal Is 'Good': " + str(p.CheckMatrixDiagonal())
+    print "Matrix Is Consistent: " + str(p.CheckMatrixConsistency())
 
     distanceTup = p2.GetDistance(p)
     print "Total Distance between matrices = " + str(distanceTup[0]) + ", differences = " + str(distanceTup[1])
-
+    #
     # root = Tk()
-    # ParseInput()
-    #
+    # #
     # root.attributes("-topmost", True)
-    # root.minsize(width=133, height=133)
+    # root.minsize(width=400, height=300)
+    #
+    # win = PanedWindow(root,orient=VERTICAL)
+    # win.pack(fill=BOTH, expand=2)
+    #
+    # top = Label(win, text="")
+    # win.add(top)
+    #
+    # # middle = Label(win, text="Test", bg="#ffffff")
+    # # win.add(middle)
+    #
+    # bottom = Label(root, text="")
+    # win.add(bottom)
+    # win.update()
+    #
     # center(root)
+    # #
+    # # for i in range(0, len(matrixInputSquares)):
+    # #     rowSquares = []
+    # #     for j in range(0, len(matrixInputSquares)):
+    # #         w = Label(root, text=str(i) + "," + str(j))
+    # #         # print w
+    # #         w.grid(row=i, column=j)
+    # #         rowSquares.append(w)
+    # #     matrixSquares.append(rowSquares)
+    # #
+    # b = Button(bottom, text="Check", command=callback).pack(fill=BOTH, expand=True, pady=10)
     #
-    # for i in range(0, len(matrixInputSquares)):
-    #     rowSquares = []
-    #     for j in range(0, len(matrixInputSquares)):
-    #         w = Label(root, text=str(i) + "," + str(j))
-    #         # print w
-    #         w.grid(row=i, column=j)
-    #         rowSquares.append(w)
-    #     matrixSquares.append(rowSquares)
-    #
-    # b = Button(root, text="Check", command=callback).grid()
     # root.mainloop()
 
 
