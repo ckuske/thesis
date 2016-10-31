@@ -1,10 +1,10 @@
-# start with a known consistent matrix and then measure the number of inconsistnc detected. (and how does it scale with the size of the matrix)
+# 3 Oct 2016
+#  start with a known consistent matrix and then measure the number of inconsistnc detected. (and how does it scale with the size of the matrix)
 # keep track of the locations of the inconsistent items
 
+# 10 Oct 2016
 # besides the direct check of 'b', how many other cycles is 'b' involved in (where it is the Aik or Ajk)
-
-# if one item is changed, 'b', how many other consistyency checks would then fail.  It is more n^2
-
+# if one item is changed, 'b', how many other consistency checks would then fail.  It is more n^2?
 # 3n of the items will include 'b'
 
 # take matrix full of ones
@@ -95,6 +95,7 @@ class PairwiseMatrix:
 
                         # print ""
 
+
         return True
 
     def GetDistance(self, oMatrix):
@@ -104,7 +105,10 @@ class PairwiseMatrix:
             for j in range(0, self.matrixSize):
 
                 thisMatrixTuple = list(ParseFraction(self.GetItem(i, j)))
+                thisMatrixIsOnes = (thisMatrixTuple[0] == thisMatrixTuple[1])
+
                 otherMatrixTuple = list(ParseFraction(oMatrix.GetItem(i, j)))
+                otherMatrixIsOnes = (otherMatrixTuple[0] == otherMatrixTuple[1])
 
                 #if thisMatrixTuple[0] == thisMatrixTuple[1]
 
@@ -113,19 +117,37 @@ class PairwiseMatrix:
                     a = int(thisMatrixTuple[1])
                     b = int(otherMatrixTuple[1])
                     common_divisor = fractions.gcd(a, b)
-                    if thisMatrixTuple[0] != thisMatrixTuple[1]:  # if it's not a whole number
-                        lcd = ((a * b) / common_divisor)
-                        thisMatrixTuple[0] = str(int(thisMatrixTuple[0]) * (lcd / a))
-                        thisMatrixTuple[1] = str(lcd)
+                    lcd = ((a * b) / common_divisor)
 
-                    if otherMatrixTuple[0] != otherMatrixTuple[1]:  # if it's not a whole number
-                        lcd = ((a * b) / common_divisor)
-                        otherMatrixTuple[0] = str(int(otherMatrixTuple[0]) * (lcd / b))
+                    # if thisMatrixTuple[0] != thisMatrixTuple[1]:  # if it's not a whole number
+                    #     thisMatrixTuple[0] = str(int(thisMatrixTuple[0]) * (lcd / a))
+                    #     thisMatrixTuple[1] = str(lcd)
+                    #
+                    # if otherMatrixTuple[0] != otherMatrixTuple[1]:  # if it's not a whole number
+                    #     otherMatrixTuple[0] = str(int(otherMatrixTuple[0]) * (lcd / b))
+                    #     otherMatrixTuple[1] = str(lcd)
+                    #
+                    # else:
+                    if int(thisMatrixTuple[1]) != lcd:
+                        thisMatrixTuple[0] = str(int(thisMatrixTuple[0]) * lcd)
+                        thisMatrixTuple[1] = str(lcd)
+                        # if int(otherMatrixTuple[1]) == lcd:
+                        #    otherMatrixTuple[0] = str(int(otherMatrixTuple[0]) * lcd)
+                    if int(otherMatrixTuple[1]) != lcd:
+                        otherMatrixTuple[0] = str(int(otherMatrixTuple[0]) * lcd)
                         otherMatrixTuple[1] = str(lcd)
+                        # if int(thisMatrixTuple[1]) == lcd:
+                        #    thisMatrixTuple[0] = str(int(thisMatrixTuple[0]) * lcd)
 
                     difference = abs((float(thisMatrixTuple[0]) - float(otherMatrixTuple[0])) / lcd)
                 else:
                     lcd = int(thisMatrixTuple[1])
+                    if int(thisMatrixTuple[1]) != lcd:
+                        thisMatrixTuple[0] = str(int(thisMatrixTuple[0]) * lcd)
+                        thisMatrixTuple[1] = str(lcd)
+                    if int(otherMatrixTuple[1]) != lcd:
+                        otherMatrixTuple[0] = str(int(otherMatrixTuple[0]) * lcd)
+                        otherMatrixTuple[1] = str(lcd)
                     difference = abs((float(thisMatrixTuple[0]) - float(otherMatrixTuple[0])) / lcd)
 
                 if (difference != 0):
@@ -139,7 +161,7 @@ def ParseFraction(inputStr):
     fractionParts = inputStr.split('/')
     if len(fractionParts) == 2:
         return fractionParts[0], fractionParts[1]
-    return fractionParts[0], fractionParts[0]
+    return fractionParts[0], '1'
 
 def SimplifyFraction(inputStr):
     fractionParts = inputStr.split('/')
@@ -297,6 +319,11 @@ def center(win):
 
 
 if __name__ == "__main__":
+    allOnes = PairwiseMatrix()
+    allOnes.AddMatrixRow(['1', '1', '1'])
+    allOnes.AddMatrixRow(['1', '1', '1'])
+    allOnes.AddMatrixRow(['1', '1', '1'])
+    allOnes.PrintMatrix()
 
     #1 3 5;2/6 1 10/6;1/5 3/5 1
     p = PairwiseMatrix()
@@ -305,67 +332,14 @@ if __name__ == "__main__":
     p.AddMatrixRow(['1/5','3/5','1'])
     p.PrintMatrix()
 
-
-    p2 = PairwiseMatrix()
-    p2.AddMatrixRow(['2', '3', '5'])
-    p2.AddMatrixRow(['1/3', '1', '10/6'])
-    p2.AddMatrixRow(['1/5', '7/10', '1'])
-    p2.PrintMatrix()
+    # p2 = PairwiseMatrix()
+    # p2.AddMatrixRow(['2', '3', '5'])
+    # p2.AddMatrixRow(['1/3', '1', '10/6'])
+    # p2.AddMatrixRow(['1/5', '7/10', '1'])
+    # p2.PrintMatrix()
 
     print "Matrix Diagonal Is 'Good': " + str(p.CheckMatrixDiagonal())
     print "Matrix Is Consistent: " + str(p.CheckMatrixConsistency())
 
-    distanceTup = p2.GetDistance(p)
+    distanceTup = p.GetDistance(allOnes)
     print "Total Distance between matrices = " + str(distanceTup[0]) + ", differences = " + str(distanceTup[1])
-    #
-    # root = Tk()
-    # #
-    # root.attributes("-topmost", True)
-    # root.minsize(width=400, height=300)
-    #
-    # win = PanedWindow(root,orient=VERTICAL)
-    # win.pack(fill=BOTH, expand=2)
-    #
-    # top = Label(win, text="")
-    # win.add(top)
-    #
-    # # middle = Label(win, text="Test", bg="#ffffff")
-    # # win.add(middle)
-    #
-    # bottom = Label(root, text="")
-    # win.add(bottom)
-    # win.update()
-    #
-    # center(root)
-    # #
-    # # for i in range(0, len(matrixInputSquares)):
-    # #     rowSquares = []
-    # #     for j in range(0, len(matrixInputSquares)):
-    # #         w = Label(root, text=str(i) + "," + str(j))
-    # #         # print w
-    # #         w.grid(row=i, column=j)
-    # #         rowSquares.append(w)
-    # #     matrixSquares.append(rowSquares)
-    # #
-    # b = Button(bottom, text="Check", command=callback).pack(fill=BOTH, expand=True, pady=10)
-    #
-    # root.mainloop()
-
-
-# def GetMatrixDiagonal():
-#     global matrix
-#     diagonals = matrix.diagonal()
-#     print diagonals
-
-# def GetUpperMatrix(n):
-#     global matrix
-#     a = np.triu_indices(n)
-#     print a[0]
-#     return a[0]
-#
-# def GetLowerMatrix(n):
-#     global matrix
-#     a = np.tril_indices(n)
-#     print a[0]
-#     return a[0]
-

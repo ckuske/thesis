@@ -1,0 +1,52 @@
+    #
+    # root = Tk()
+    # #
+    # root.attributes("-topmost", True)
+    # root.minsize(width=400, height=300)
+    #
+    # win = PanedWindow(root,orient=VERTICAL)
+    # win.pack(fill=BOTH, expand=2)
+    #
+    # top = Label(win, text="")
+    # win.add(top)
+    #
+    # # middle = Label(win, text="Test", bg="#ffffff")
+    # # win.add(middle)
+    #
+    # bottom = Label(root, text="")
+    # win.add(bottom)
+    # win.update()
+    #
+    # center(root)
+    # #
+    # # for i in range(0, len(matrixInputSquares)):
+    # #     rowSquares = []
+    # #     for j in range(0, len(matrixInputSquares)):
+    # #         w = Label(root, text=str(i) + "," + str(j))
+    # #         # print w
+    # #         w.grid(row=i, column=j)
+    # #         rowSquares.append(w)
+    # #     matrixSquares.append(rowSquares)
+    # #
+    # b = Button(bottom, text="Check", command=callback).pack(fill=BOTH, expand=True, pady=10)
+    #
+    # root.mainloop()
+
+
+# def GetMatrixDiagonal():
+#     global matrix
+#     diagonals = matrix.diagonal()
+#     print diagonals
+
+# def GetUpperMatrix(n):
+#     global matrix
+#     a = np.triu_indices(n)
+#     print a[0]
+#     return a[0]
+#
+# def GetLowerMatrix(n):
+#     global matrix
+#     a = np.tril_indices(n)
+#     print a[0]
+#     return a[0]
+
