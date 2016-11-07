@@ -20,13 +20,23 @@ root = 0
 
 
 class PairwiseMatrix:
-    matrixSize = 0  # NxN matrix
 
     def __init__(self, data=[]):
         self.matrixData = []
         self.matrixSize = 0
         self.inconsistentLocations = []
         self.inconsistenciesDetected = 0
+        self.greatestDistanceLocation = []
+        self.greatestDistanceValue = 0
+
+    def ResetInconsistencyData(self):
+        self.inconsistentLocations = []
+        self.inconsistenciesDetected = 0
+
+    def ResetInconsistencyLocations(self):
+        self.greatestDistanceLocation = []
+        self.greatestDistanceValue = 0
+
 
     def setWindowRoot(self, root):
         self.root = root
@@ -48,12 +58,21 @@ class PairwiseMatrix:
     def PrintInconsistencies(self):
         print self.inconsistentLocations
 
+    def GetGreatestDistanceValue(self):
+        return self.greatestDistanceValue
+
+    def GetGreatestDistanceLocation(self):
+        return self.greatestDistanceLocation
+
     def GetItem(self,x,y):
         if x > self.matrixSize - 1:
             return ""
         elif y > self.matrixSize - 1:
             return ""
         return self.matrixData[x][y]
+
+    def SetItem(self, x, y, val):
+        self.matrixData[x][y] = val
 
     def CheckMatrixDiagonal(self):
         for i in range(0, self.matrixSize):
@@ -70,9 +89,9 @@ class PairwiseMatrix:
             for j in range(0, n):
                 for k in range(0, n):
 
-                    if i == j:
+                    # if i == j:
                     #    matrixSquares[i][j].config(text="1")
-                    continue
+                    #    continue
 
                     # Dij = Dik * Dkj
                     # print "i=" + str(i) + ", j=" + str(j) + ", k=" + str(k) + " -> " + \
@@ -102,7 +121,7 @@ class PairwiseMatrix:
 
         return (self.inconsistenciesDetected, self.inconsistentLocations)
 
-    def GetDistance(self, oMatrix):
+    def GetDistance(self, oMatrix, xPos=-1, yPos=-1):
         totalDistance = 0.0
         differencesNoted = 0
         for i in range(0, self.matrixSize):
@@ -155,6 +174,9 @@ class PairwiseMatrix:
                     difference = abs((float(thisMatrixTuple[0]) - float(otherMatrixTuple[0])) / lcd)
 
                 if (difference != 0):
+                    if abs(difference) > self.greatestDistanceValue:
+                        self.greatestDistanceValue = abs(difference)
+                        self.greatestDistanceLocation = [i, j]
                     totalDistance += abs(difference)
                     differencesNoted += 1
 
@@ -296,36 +318,45 @@ if __name__ == "__main__":
     print "Distance from allOnes to fixedOneTwo: " + str(distanceFromOneTwo)
     print "Number of differences: " + str(numberOfDiffs)
 
-    # allOnes = PairwiseMatrix()
-    # allOnes.AddMatrixRow(['1', '1', '1'])
-    # allOnes.AddMatrixRow(['1', '1', '1'])
-    # allOnes.AddMatrixRow(['1', '1', '1'])
-    # allOnes.PrintMatrix()
-    # print "Matrix Diagonal Is 'Good': " + str(allOnes.CheckMatrixDiagonal())
-    #
-    # print "Matrix Is Consistent: " + str(allOnes.CheckMatrixConsistency()[0] == 0)
-    # if allOnes.CheckMatrixConsistency()[0] != 0:
-    #     allOnes.PrintInconsistencies()
-    #
-    # distanceTup = allOnes.GetDistance(allOnes)
-    # print "Total Distance between matrices = " + str(distanceTup[0]) + ", differences = " + str(distanceTup[1])
-    # print ""
-    #
-    # #1 3 5;2/6 1 10/6;1/5 3/5 1
-    # p = PairwiseMatrix()
-    # p.AddMatrixRow(['1','3', '5'])
-    # p.AddMatrixRow(['1/3', '1', '5/3'])
-    # p.AddMatrixRow(['1/5','3/5','1'])
-    # p.PrintMatrix()
-    # print "Matrix Diagonal Is 'Good': " + str(p.CheckMatrixDiagonal())
-    # print "Matrix Is Consistent: " + str(p.CheckMatrixConsistency()[0] == 0)
-    # distanceTup = p.GetDistance(allOnes)
-    # print "Total Distance between matrices = " + str(distanceTup[0]) + ", differences = " + str(distanceTup[1])
+    allOnesOrig = PairwiseMatrix()
+    allOnesOrig.AddMatrixRow(['1', '1', '1'])
+    allOnesOrig.AddMatrixRow(['1', '1', '1'])
+    allOnesOrig.AddMatrixRow(['1', '1', '1'])
 
-    # p2 = PairwiseMatrix()
-    # p2.AddMatrixRow(['2', '3', '5'])
-    # p2.AddMatrixRow(['1/3', '1', '10/6'])
-    # p2.AddMatrixRow(['1/5', '7/10', '1'])
-    # p2.PrintMatrix()
+    allOnes = PairwiseMatrix()
+    allOnes.AddMatrixRow(['1', '1', '1'])
+    allOnes.AddMatrixRow(['1', '1', '1'])
+    allOnes.AddMatrixRow(['1', '1', '1'])
+    allOnes.PrintMatrix()
+    print "Matrix Diagonal Is 'Good': " + str(allOnes.CheckMatrixDiagonal())
+    print "Matrix Is Consistent: " + str(noi == 0)
+    if noi > 0:
+        print "Number on Inconsistencies: " + str(noi)
+        allOnes.PrintInconsistencies()
 
+    (distanceFromallOnes, numberOfDiffs) = allOnes.GetDistance(allOnes)
+    print ""
+    print "Distance from allOnes to allOnes: " + str(distanceFromallOnes)
+    print "Number of differences: " + str(numberOfDiffs)
 
+    for i in range(0, allOnes.GetSize()):
+        for j in range(0, allOnes.GetSize()):
+            oldVal = allOnes.GetItem(i, j)
+            allOnes.SetItem(i, j, '2')
+            allOnes.PrintMatrix()
+
+            (noi, consistent) = allOnes.CheckMatrixConsistency();
+            print "Matrix Diagonal Is 'Good': " + str(allOnes.CheckMatrixDiagonal())
+            print "Matrix Is Consistent: " + str(noi == 0)
+            if noi > 0:
+                print "Number on Inconsistencies: " + str(noi)
+                print "Inconsistent Locations: "
+                allOnes.PrintInconsistencies()
+            allOnes.GetDistance(allOnesOrig)
+
+            allOnes.SetItem(i, j, oldVal)
+            allOnes.ResetInconsistencyData()
+            print ""
+
+    print "Greatest distance value = " + str(allOnes.GetGreatestDistanceValue())
+    print "Greatest distance location = " + str(allOnes.GetGreatestDistanceLocation())
