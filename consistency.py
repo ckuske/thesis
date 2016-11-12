@@ -8,7 +8,7 @@
 # 3n of the items will include 'b'
 
 # take matrix full of ones
-# computer difference between other matrix and matrix full of ones
+# compute difference between other matrix and matrix full of ones
 # use the place with the largest diff between ones matrix and other matrix
 
 import fractions
@@ -287,37 +287,37 @@ def center(win):
 
 if __name__ == "__main__":
 
-    oneTwo = PairwiseMatrix()
-    oneTwo.AddMatrixRow(['1', '1', '2'])
-    oneTwo.AddMatrixRow(['1', '1', '1'])
-    oneTwo.AddMatrixRow(['1', '1', '1'])
-    oneTwo.PrintMatrix()
-    (noi, consistent) = oneTwo.CheckMatrixConsistency();
-    print "Matrix Diagonal Is 'Good': " + str(oneTwo.CheckMatrixDiagonal())
-    print "Matrix Is Consistent: " + str(noi == 0)
-    if noi > 0:
-        print "Number on Inconsistencies: " + str(noi)
-        print "Inconsistent Locations: "
-        oneTwo.PrintInconsistencies()
-
-    print ""
-    fixedOneTwo = PairwiseMatrix()
-    fixedOneTwo.AddMatrixRow(['1', '1', '2'])
-    fixedOneTwo.AddMatrixRow(['1', '1', '2'])
-    fixedOneTwo.AddMatrixRow(['1/2', '1/2', '1'])
-    fixedOneTwo.PrintMatrix()
-    (noi, consistent) = fixedOneTwo.CheckMatrixConsistency();
-    print "Matrix Diagonal Is 'Good': " + str(fixedOneTwo.CheckMatrixDiagonal())
-    print "Matrix Is Consistent: " + str(noi == 0)
-    if noi > 0:
-        print "Number on Inconsistencies: " + str(noi)
-        fixedOneTwo.PrintInconsistencies()
-
-    (distanceFromOneTwo, numberOfDiffs) = oneTwo.GetDistance(fixedOneTwo)
-    print ""
-    print "Distance from allOnes to fixedOneTwo: " + str(distanceFromOneTwo)
-    print "Number of differences: " + str(numberOfDiffs)
-
+    # oneTwo = PairwiseMatrix()
+    # oneTwo.AddMatrixRow(['1', '1', '2'])
+    # oneTwo.AddMatrixRow(['1', '1', '1'])
+    # oneTwo.AddMatrixRow(['1', '1', '1'])
+    # oneTwo.PrintMatrix()
+    # (noi, consistent) = oneTwo.CheckMatrixConsistency();
+    # print "Matrix Diagonal Is 'Good': " + str(oneTwo.CheckMatrixDiagonal())
+    # print "Matrix Is Consistent: " + str(noi == 0)
+    # if noi > 0:
+    #     print "Number on Inconsistencies: " + str(noi)
+    #     print "Inconsistent Locations: "
+    #     oneTwo.PrintInconsistencies()
+    #
+    # print ""
+    # fixedOneTwo = PairwiseMatrix()
+    # fixedOneTwo.AddMatrixRow(['1', '1', '2'])
+    # fixedOneTwo.AddMatrixRow(['1', '1', '2'])
+    # fixedOneTwo.AddMatrixRow(['1/2', '1/2', '1'])
+    # fixedOneTwo.PrintMatrix()
+    # (noi, consistent) = fixedOneTwo.CheckMatrixConsistency();
+    # print "Matrix Diagonal Is 'Good': " + str(fixedOneTwo.CheckMatrixDiagonal())
+    # print "Matrix Is Consistent: " + str(noi == 0)
+    # if noi > 0:
+    #     print "Number on Inconsistencies: " + str(noi)
+    #     fixedOneTwo.PrintInconsistencies()
+    #
+    # (distanceFromOneTwo, numberOfDiffs) = oneTwo.GetDistance(fixedOneTwo)
+    # print ""
+    # print "Distance from allOnes to fixedOneTwo: " + str(distanceFromOneTwo)
+    # print "Number of differences: " + str(numberOfDiffs)
+    #
     allOnesOrig = PairwiseMatrix()
     allOnesOrig.AddMatrixRow(['1', '1', '1'])
     allOnesOrig.AddMatrixRow(['1', '1', '1'])
@@ -328,6 +328,7 @@ if __name__ == "__main__":
     allOnes.AddMatrixRow(['1', '1', '1'])
     allOnes.AddMatrixRow(['1', '1', '1'])
     allOnes.PrintMatrix()
+    (noi, consistent) = allOnes.CheckMatrixConsistency();
     print "Matrix Diagonal Is 'Good': " + str(allOnes.CheckMatrixDiagonal())
     print "Matrix Is Consistent: " + str(noi == 0)
     if noi > 0:
@@ -341,6 +342,10 @@ if __name__ == "__main__":
 
     for i in range(0, allOnes.GetSize()):
         for j in range(0, allOnes.GetSize()):
+
+            if i == j:
+                continue
+
             oldVal = allOnes.GetItem(i, j)
             allOnes.SetItem(i, j, '2')
             allOnes.PrintMatrix()
