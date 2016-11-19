@@ -11,6 +11,7 @@
 # compute difference between other matrix and matrix full of ones
 # use the place with the largest diff between ones matrix and other matrix
 
+import copy
 import fractions
 
 dataList = []  # list of lists
@@ -20,10 +21,14 @@ root = 0
 
 
 class PairwiseMatrix:
-
     def __init__(self, data=[]):
         self.matrixData = []
         self.matrixSize = 0
+
+        if len(data) > 0:
+            self.matrixData = copy.deepcopy(data)
+            self.matrixSize = len(data)
+
         self.inconsistentLocations = []
         self.inconsistenciesDetected = 0
         self.greatestDistanceLocation = []
@@ -37,7 +42,6 @@ class PairwiseMatrix:
         self.greatestDistanceLocation = []
         self.greatestDistanceValue = 0
 
-
     def setWindowRoot(self, root):
         self.root = root
 
@@ -46,13 +50,13 @@ class PairwiseMatrix:
         self.matrixSize += 1
 
     def PrintMatrix(self):
-        for i in range(0,self.matrixSize):
+        for i in range(0, self.matrixSize):
             print self.matrixData[i]
 
     def GetSize(self):
         return self.matrixSize
 
-    def GetRow(self,i):
+    def GetRow(self, i):
         return self.matrixData[i]
 
     def PrintInconsistencies(self):
@@ -64,7 +68,7 @@ class PairwiseMatrix:
     def GetGreatestDistanceLocation(self):
         return self.greatestDistanceLocation
 
-    def GetItem(self,x,y):
+    def GetItem(self, x, y):
         if x > self.matrixSize - 1:
             return ""
         elif y > self.matrixSize - 1:
@@ -89,9 +93,8 @@ class PairwiseMatrix:
             for j in range(0, n):
                 for k in range(0, n):
 
-                    # if i == j:
-                    #    matrixSquares[i][j].config(text="1")
-                    #    continue
+                    if i == j:
+                        continue
 
                     # Dij = Dik * Dkj
                     # print "i=" + str(i) + ", j=" + str(j) + ", k=" + str(k) + " -> " + \
@@ -99,9 +102,36 @@ class PairwiseMatrix:
                     #      self.GetItem(k, j)) + "[" + str(
                     #      k) + "," + str(j) + "] should be " + str(self.GetItem(i, j))
 
-                    (ijNum, ijDenom) = GetNumeratorDenominator(self.GetItem(i, j))
-                    (ikNum, ikDenom) = GetNumeratorDenominator(self.GetItem(i, k))
-                    (kjNum, kjDenom) = GetNumeratorDenominator(self.GetItem(k, j))
+                    # get i,j
+                    (ijNum, ijDenom) = (0, 0)
+                    fractionStr = self.GetItem(i, j)
+                    if '/' not in fractionStr:
+                        (ijNum, ijDenom) = fractionStr, '1'
+                    else:
+                        items = fractionStr.split('/')
+                        (ijNum, ijDenom) = items[0], items[1]
+
+                    # get i,k
+                    (ikNum, ikDenom) = (0, 0)
+                    fractionStr = self.GetItem(i, k)
+                    if '/' not in fractionStr:
+                        (ikNum, ikDenom) = fractionStr, '1'
+                    else:
+                        items = fractionStr.split('/')
+                        (ikNum, ikDenom) = items[0], items[1]
+
+                    # get k,j
+                    (kjNum, kjDenom) = (0, 0)
+                    fractionStr = self.GetItem(k, j)
+                    if '/' not in fractionStr:
+                        (kjNum, kjDenom) = fractionStr, '1'
+                    else:
+                        items = fractionStr.split('/')
+                        (kjNum, kjDenom) = items[0], items[1]
+
+                    # (ijNum, ijDenom) = GetNumeratorDenominator(self.GetItem(i, j))
+                    # (ikNum, ikDenom) = GetNumeratorDenominator(self.GetItem(i, k))
+                    # (kjNum, kjDenom) = GetNumeratorDenominator(self.GetItem(k, j))
                     # print(ijNum, ijDenom)
                     # print(ikNum, ikDenom)
                     # print(kjNum, kjDenom)
@@ -109,7 +139,21 @@ class PairwiseMatrix:
                     ijTop = (int(ikNum) * int(kjNum))
                     ijBottom = int(ikDenom) * int(kjDenom)
 
-                    (a, b) = simplify_fraction(ijTop, ijBottom)
+                    # (a, b) = simplify_fraction(ijTop, ijBottom)
+
+                    if ijBottom == 0:
+                        return ""
+                    common_divisor = fractions.gcd(ijTop, ijBottom)
+                    (reduced_num, reduced_den) = (ijTop / common_divisor, ijBottom / common_divisor)
+                    tup = ()
+
+                    if reduced_den == 1:  #
+                        tup = (reduced_num, reduced_den)
+                    elif common_divisor == 1:
+                        tup = (ijTop, ijBottom)
+                    else:
+                        tup = (reduced_num, reduced_den)
+                    (a, b) = tup
 
                     if (int(a) != int(ijNum)) or (int(b) != int(ijDenom)):
                         # print "A=" + str(a)
@@ -133,7 +177,7 @@ class PairwiseMatrix:
                 otherMatrixTuple = list(ParseFraction(oMatrix.GetItem(i, j)))
                 otherMatrixIsOnes = (otherMatrixTuple[0] == otherMatrixTuple[1])
 
-                #if thisMatrixTuple[0] == thisMatrixTuple[1]
+                # if thisMatrixTuple[0] == thisMatrixTuple[1]
 
                 if thisMatrixTuple[1] != otherMatrixTuple[1]:  # find common denominator
                     lcd = 1
@@ -180,8 +224,9 @@ class PairwiseMatrix:
                     totalDistance += abs(difference)
                     differencesNoted += 1
 
-                # print "Difference [" + str(i) + "," + str(j) + "]= " + str(abs(difference))
+                    # print "Difference [" + str(i) + "," + str(j) + "]= " + str(abs(difference))
         return (totalDistance, differencesNoted)
+
 
 def ParseFraction(inputStr):
     fractionParts = inputStr.split('/')
@@ -189,101 +234,79 @@ def ParseFraction(inputStr):
         return fractionParts[0], fractionParts[1]
     return fractionParts[0], '1'
 
-def SimplifyFraction(inputStr):
-    fractionParts = inputStr.split('/')
-    if len(fractionParts) == 1:
-        return inputStr  # nothing to do
 
-    numerator = fractionParts[0]
-    denominator = fractionParts[1]
-    tup = simplify_fraction(int(numerator), int(denominator))
-
-    reducedFraction = str(tup[0]) + "/" + str(tup[1])
-
-    return reducedFraction
-
-
-def ParseInput():
-    global matrixInputSquares
-    matrixStr = '1 3 5;2/6 1 10/6;1/5 3/5 1'
-    rows = matrixStr.split(';')
-    print "Original Input:"
-    for i in range(0, len(rows)):
-        row = rows[i].split()
-        print row
-
-    print ""
-    for i in range(0, len(rows)):
-        row = rows[i].split()
-        for j in range(0, len(row)):
-            matrixStr = SimplifyFraction(row[j])
-            row[j] = matrixStr
-        matrixInputSquares.append(row)
+# def SimplifyFraction(inputStr):
+#     fractionParts = inputStr.split('/')
+#     if len(fractionParts) == 1:
+#         return inputStr  # nothing to do
+#
+#     numerator = int(fractionParts[0])
+#     denominator = int(fractionParts[1])
+#     # tup = simplify_fraction(int(numerator), int(denominator))
+#
+#     if denominator == 0:
+#         return ""
+#     common_divisor = fractions.gcd(numerator, denominator)
+#     (reduced_num, reduced_den) = (numerator / common_divisor, denominator / common_divisor)
+#     tup = ()
+#
+#     if reduced_den == 1:  #
+#         tup = (reduced_num, reduced_den)
+#     elif common_divisor == 1:
+#         tup = (numerator, denominator)
+#     else:
+#         tup = (reduced_num, reduced_den)
+#
+#     reducedFraction = str(tup[0]) + "/" + str(tup[1])
+#
+#     return reducedFraction
 
 
-def simplify_fraction(numer, denom):
-    if denom == 0:
-        return "Division by 0 - result undefined"
+# def ParseInput():
+#     global matrixInputSquares
+#     matrixStr = '1 3 5;2/6 1 10/6;1/5 3/5 1'
+#     rows = matrixStr.split(';')
+#     print "Original Input:"
+#     for i in range(0, len(rows)):
+#         row = rows[i].split()
+#         print row
+#
+#     print ""
+#     for i in range(0, len(rows)):
+#         row = rows[i].split()
+#         for j in range(0, len(row)):
+#             matrixStr = SimplifyFraction(row[j])
+#             row[j] = matrixStr
+#         matrixInputSquares.append(row)
 
-    # Remove greatest common divisor:
-    common_divisor = fractions.gcd(numer, denom)
-    (reduced_num, reduced_den) = (numer / common_divisor, denom / common_divisor)
-    # Note that reduced_den > 0 as documented in the gcd function.
 
-    if reduced_den == 1:  #
-        #print "%d/%d is simplified to %d" % (numer, denom, reduced_num)
-        return reduced_num, reduced_den
-    elif common_divisor == 1:
-        #print "%d/%d is already at its most simplified state" % (numer, denom)
-        return numer, denom
-    else:
-        #print "%d/%d is simplified to %d/%d" % (numer, denom, reduced_num, reduced_den)
-        return reduced_num, reduced_den
+#
+# def simplify_fraction(numer, denom):
+#     if denom == 0:
+#         return "Division by 0 - result undefined"
+#
+#     # Remove greatest common divisor:
+#     common_divisor = fractions.gcd(numer, denom)
+#     (reduced_num, reduced_den) = (numer / common_divisor, denom / common_divisor)
+#     # Note that reduced_den > 0 as documented in the gcd function.
+#
+#     if reduced_den == 1:  #
+#         #print "%d/%d is simplified to %d" % (numer, denom, reduced_num)
+#         return reduced_num, reduced_den
+#     elif common_divisor == 1:
+#         #print "%d/%d is already at its most simplified state" % (numer, denom)
+#         return numer, denom
+#     else:
+#         #print "%d/%d is simplified to %d/%d" % (numer, denom, reduced_num, reduced_den)
+#         return reduced_num, reduced_den
 
 
 def GetNumeratorDenominator(fractionStr):
-    items = fractionStr.split('/')
-    if len(items) == 1:
+    if '/' not in fractionStr:
         return fractionStr, '1'
     else:
+        items = fractionStr.split('/')
         return items[0], items[1]
-
-def callback():
-    global matrixInputSquares
-    # print matrixSquares
-    # if not CheckMatrixDiagonal():
-    #     print "Matrix not consistent (diagonal).  Exiting!"
-    #     exit()
-    p.setWindowRoot(root)
-    center(root)
-    p.CheckMatrixConsistency()
-    # if p.CheckMatrixConsistency():
-    #     middle.config(text="Consistent!")
-    # else:
-    #     middle.config(text="Not Consistent")
-    # root.update()
-    # if not CheckMatrixConsistency(len(matrixInputSquares)):
-    #     print "Matrix not consistent.  Exiting!"
-    #     exit()
-    # print "\nMatrix is consistent."
-
-def center(win):
-    """
-    centers a tkinter window
-    :param win: the root or Toplevel window to center
-    """
-    win.update_idletasks()
-    width = win.winfo_width()
-    frm_width = win.winfo_rootx() - win.winfo_x()
-    win_width = width + 2 * frm_width
-    height = win.winfo_height()
-    titlebar_height = win.winfo_rooty() - win.winfo_y()
-    win_height = height + titlebar_height + frm_width
-    x = win.winfo_screenwidth() // 2 - win_width // 2
-    y = win.winfo_screenheight() // 2 - win_height // 2
-    win.geometry('{}x{}+{}+{}'.format(width, height, x, y))
-    win.deiconify()
-
 
 if __name__ == "__main__":
 
@@ -318,50 +341,51 @@ if __name__ == "__main__":
     # print "Distance from allOnes to fixedOneTwo: " + str(distanceFromOneTwo)
     # print "Number of differences: " + str(numberOfDiffs)
     #
-    allOnesOrig = PairwiseMatrix()
-    allOnesOrig.AddMatrixRow(['1', '1', '1'])
-    allOnesOrig.AddMatrixRow(['1', '1', '1'])
-    allOnesOrig.AddMatrixRow(['1', '1', '1'])
 
-    allOnes = PairwiseMatrix()
-    allOnes.AddMatrixRow(['1', '1', '1'])
-    allOnes.AddMatrixRow(['1', '1', '1'])
-    allOnes.AddMatrixRow(['1', '1', '1'])
-    allOnes.PrintMatrix()
-    (noi, consistent) = allOnes.CheckMatrixConsistency();
-    print "Matrix Diagonal Is 'Good': " + str(allOnes.CheckMatrixDiagonal())
-    print "Matrix Is Consistent: " + str(noi == 0)
-    if noi > 0:
-        print "Number on Inconsistencies: " + str(noi)
-        allOnes.PrintInconsistencies()
+    for i in range(3, 101):
+        print "Matrix Size: " + str(i) + "x" + str(i)
+        allOnesOrig = PairwiseMatrix([['1' for count in range(i)] for count in range(i)])
+        allOnes = PairwiseMatrix([['1' for count in range(i)] for count in range(i)])
+        # allOnes.PrintMatrix()
+        # (noi, consistent) = allOnes.CheckMatrixConsistency();
+        # print "Matrix Diagonal Is 'Good': " + str(allOnes.CheckMatrixDiagonal())
+        # print "Matrix Is Consistent: " + str(noi == 0)
+        # if noi > 0:
+        #    print "Number on Inconsistencies: " + str(noi)
+        #     allOnes.PrintInconsistencies()
+        #
+        (distanceFromallOnes, numberOfDiffs) = allOnes.GetDistance(allOnes)
+        # print ""
+        # print "Distance from allOnes to allOnes: " + str(distanceFromallOnes)
+        # print "Number of differences: " + str(numberOfDiffs)
+        #
+        for i in range(0, allOnes.GetSize()):
+            for j in range(0, allOnes.GetSize()):
 
-    (distanceFromallOnes, numberOfDiffs) = allOnes.GetDistance(allOnes)
-    print ""
-    print "Distance from allOnes to allOnes: " + str(distanceFromallOnes)
-    print "Number of differences: " + str(numberOfDiffs)
+                if i == j:
+                    continue
 
-    for i in range(0, allOnes.GetSize()):
-        for j in range(0, allOnes.GetSize()):
-
-            if i == j:
-                continue
-
-            oldVal = allOnes.GetItem(i, j)
-            allOnes.SetItem(i, j, '2')
-            allOnes.PrintMatrix()
-
-            (noi, consistent) = allOnes.CheckMatrixConsistency();
-            print "Matrix Diagonal Is 'Good': " + str(allOnes.CheckMatrixDiagonal())
-            print "Matrix Is Consistent: " + str(noi == 0)
-            if noi > 0:
-                print "Number on Inconsistencies: " + str(noi)
-                print "Inconsistent Locations: "
-                allOnes.PrintInconsistencies()
-            allOnes.GetDistance(allOnesOrig)
-
-            allOnes.SetItem(i, j, oldVal)
-            allOnes.ResetInconsistencyData()
-            print ""
-
-    print "Greatest distance value = " + str(allOnes.GetGreatestDistanceValue())
-    print "Greatest distance location = " + str(allOnes.GetGreatestDistanceLocation())
+                oldVal = allOnes.GetItem(i, j)
+                allOnes.SetItem(i, j, '2')
+                allOnes.PrintMatrix()
+                #
+                (noi, consistent) = allOnes.CheckMatrixConsistency();
+                #         # print "Matrix Diagonal Is 'Good': " + str(allOnes.CheckMatrixDiagonal())
+                #         # print "Matrix Is Consistent: " + str(noi == 0)
+                if noi > 0:
+                    print "Number on Inconsistencies: " + str(noi)
+                    allOnes.SetItem(i, j, oldVal)
+                    allOnes.ResetInconsistencyData()
+                    # break
+                    #             #print "Inconsistent Locations: "
+                    #             #allOnes.PrintInconsistencies()
+                    #         #allOnes.GetDistance(allOnesOrig)
+                    #
+                else:
+                    allOnes.SetItem(i, j, oldVal)
+                    allOnes.ResetInconsistencyData()
+                    # print ""
+                    # if noi > 0:
+                    #    break
+                    # print "Greatest distance value = " + str(allOnes.GetGreatestDistanceValue())
+                    # print "Greatest distance location = " + str(allOnes.GetGreatestDistanceLocation())
