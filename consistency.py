@@ -389,7 +389,7 @@ def GenerateConsistentMatrix(matrixSize):
 
 
 if __name__ == "__main__":
-    GenerateConsistentMatrix(4)
+    GenerateConsistentMatrix(3)
     # FunctionFun()
     # ModifyOneElement()
     # parser = argparse.ArgumentParser(description='Process some integers.')
