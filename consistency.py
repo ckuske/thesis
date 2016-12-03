@@ -11,8 +11,11 @@
 # compute difference between other matrix and matrix full of ones
 # use the place with the largest diff between ones matrix and other matrix
 
+# http://www.isc.senshu-u.ac.jp/~thc0456/EAHP/AHPweb.html
+
 import copy
 import fractions
+import random
 
 dataList = []  # list of lists
 matrixSquares = []
@@ -96,7 +99,7 @@ class PairwiseMatrix:
                     if i == j:
                         continue
 
-                    # Dij = Dik * Dkj
+                    #Dij = Dik * Dkj
                     # print "i=" + str(i) + ", j=" + str(j) + ", k=" + str(k) + " -> " + \
                     #      str(self.GetItem(i, k)) + "[" + str(i) + "," + str(k) + "] * " + str(
                     #      self.GetItem(k, j)) + "[" + str(
@@ -129,9 +132,9 @@ class PairwiseMatrix:
                         items = fractionStr.split('/')
                         (kjNum, kjDenom) = items[0], items[1]
 
-                    # (ijNum, ijDenom) = GetNumeratorDenominator(self.GetItem(i, j))
-                    # (ikNum, ikDenom) = GetNumeratorDenominator(self.GetItem(i, k))
-                    # (kjNum, kjDenom) = GetNumeratorDenominator(self.GetItem(k, j))
+                    (ijNum, ijDenom) = GetNumeratorDenominator(self.GetItem(i, j))
+                    (ikNum, ikDenom) = GetNumeratorDenominator(self.GetItem(i, k))
+                    (kjNum, kjDenom) = GetNumeratorDenominator(self.GetItem(k, j))
                     # print(ijNum, ijDenom)
                     # print(ikNum, ikDenom)
                     # print(kjNum, kjDenom)
@@ -308,84 +311,110 @@ def GetNumeratorDenominator(fractionStr):
         items = fractionStr.split('/')
         return items[0], items[1]
 
-if __name__ == "__main__":
 
-    # oneTwo = PairwiseMatrix()
-    # oneTwo.AddMatrixRow(['1', '1', '2'])
-    # oneTwo.AddMatrixRow(['1', '1', '1'])
-    # oneTwo.AddMatrixRow(['1', '1', '1'])
-    # oneTwo.PrintMatrix()
-    # (noi, consistent) = oneTwo.CheckMatrixConsistency();
-    # print "Matrix Diagonal Is 'Good': " + str(oneTwo.CheckMatrixDiagonal())
-    # print "Matrix Is Consistent: " + str(noi == 0)
-    # if noi > 0:
-    #     print "Number on Inconsistencies: " + str(noi)
-    #     print "Inconsistent Locations: "
-    #     oneTwo.PrintInconsistencies()
-    #
-    # print ""
-    # fixedOneTwo = PairwiseMatrix()
-    # fixedOneTwo.AddMatrixRow(['1', '1', '2'])
-    # fixedOneTwo.AddMatrixRow(['1', '1', '2'])
-    # fixedOneTwo.AddMatrixRow(['1/2', '1/2', '1'])
-    # fixedOneTwo.PrintMatrix()
-    # (noi, consistent) = fixedOneTwo.CheckMatrixConsistency();
-    # print "Matrix Diagonal Is 'Good': " + str(fixedOneTwo.CheckMatrixDiagonal())
-    # print "Matrix Is Consistent: " + str(noi == 0)
-    # if noi > 0:
-    #     print "Number on Inconsistencies: " + str(noi)
-    #     fixedOneTwo.PrintInconsistencies()
-    #
-    # (distanceFromOneTwo, numberOfDiffs) = oneTwo.GetDistance(fixedOneTwo)
-    # print ""
-    # print "Distance from allOnes to fixedOneTwo: " + str(distanceFromOneTwo)
-    # print "Number of differences: " + str(numberOfDiffs)
-    #
+def ModifyOneElement(m):
+    for i in range(0, m.GetSize()):
+        for j in range(0, m.GetSize()):
 
-    for i in range(3, 101):
-        print "Matrix Size: " + str(i) + "x" + str(i)
-        allOnesOrig = PairwiseMatrix([['1' for count in range(i)] for count in range(i)])
-        allOnes = PairwiseMatrix([['1' for count in range(i)] for count in range(i)])
-        # allOnes.PrintMatrix()
-        # (noi, consistent) = allOnes.CheckMatrixConsistency();
-        # print "Matrix Diagonal Is 'Good': " + str(allOnes.CheckMatrixDiagonal())
-        # print "Matrix Is Consistent: " + str(noi == 0)
-        # if noi > 0:
-        #    print "Number on Inconsistencies: " + str(noi)
-        #     allOnes.PrintInconsistencies()
-        #
-        (distanceFromallOnes, numberOfDiffs) = allOnes.GetDistance(allOnes)
-        # print ""
-        # print "Distance from allOnes to allOnes: " + str(distanceFromallOnes)
-        # print "Number of differences: " + str(numberOfDiffs)
-        #
-        for i in range(0, allOnes.GetSize()):
-            for j in range(0, allOnes.GetSize()):
+            if i >= j:
+                continue
 
+            oldVal = m.GetItem(i, j)
+            oldVal2 = m.GetItem(j, i)
+            m.SetItem(i, j, str(int(oldVal) + 1))
+            m.SetItem(j, i, '1/' + str(int(oldVal) + 1))
+            m.PrintMatrix()
+
+            (noi, consistent) = m.CheckMatrixConsistency()
+            if noi > 0:
+                print "Number on Inconsistencies: " + str(noi)
+
+                if noi != (6 * (m.GetSize() - 2)):
+                    print "Unexpected number of inconsistencies!"
+                    return
+
+                m.SetItem(i, j, oldVal)
+                m.SetItem(j, i, oldVal2)
+                m.ResetInconsistencyData()
+                # break
+            else:
+                m.SetItem(i, j, oldVal)
+                m.SetItem(j, i, oldVal2)
+                m.ResetInconsistencyData()
+                # if noi > 0:
+                #     break
+    if noi == (6 * (m.GetSize() - 2)):
+        print ""
+        print "Expected number of inconsistencies found, great!"
+
+
+def FunctionFun():
+    for i in range(0, 10 + 1):
+        # print str(i) + "->" + str(2*(i-2) + 4*(i-2))
+        print str(i) + "->" + str(6 * (i - 2))
+
+
+def GenerateConsistentMatrix(matrixSize):
+    random.seed()
+    while True:
+        lists = []
+        m = PairwiseMatrix()
+        for i in range(0, matrixSize):
+            l = random.sample(range(2, 81), matrixSize)
+            # l.sort()
+            # print l
+            lists.append(l)
+
+        for i in range(0, matrixSize):
+            for j in range(0, matrixSize):
+                lists[i][j] = str(lists[i][j])
                 if i == j:
-                    continue
+                    lists[i][j] = '1'
+                if i > j:
+                    lists[i][j] = '1' + '/' + str(lists[j][i])
+            m.AddMatrixRow(lists[i])
+            # print lists[i]
+        print ""
+        m.PrintMatrix()
+        lists = []
+        (noi, consistent) = m.CheckMatrixConsistency()
 
-                oldVal = allOnes.GetItem(i, j)
-                allOnes.SetItem(i, j, '2')
-                allOnes.PrintMatrix()
-                #
-                (noi, consistent) = allOnes.CheckMatrixConsistency();
-                #         # print "Matrix Diagonal Is 'Good': " + str(allOnes.CheckMatrixDiagonal())
-                #         # print "Matrix Is Consistent: " + str(noi == 0)
-                if noi > 0:
-                    print "Number on Inconsistencies: " + str(noi)
-                    allOnes.SetItem(i, j, oldVal)
-                    allOnes.ResetInconsistencyData()
-                    # break
-                    #             #print "Inconsistent Locations: "
-                    #             #allOnes.PrintInconsistencies()
-                    #         #allOnes.GetDistance(allOnesOrig)
-                    #
-                else:
-                    allOnes.SetItem(i, j, oldVal)
-                    allOnes.ResetInconsistencyData()
-                    # print ""
-                    # if noi > 0:
-                    #    break
-                    # print "Greatest distance value = " + str(allOnes.GetGreatestDistanceValue())
-                    # print "Greatest distance location = " + str(allOnes.GetGreatestDistanceLocation())
+        if noi == 0:
+            print ""
+            print "Matrix selected"
+            m.PrintMatrix()
+            print ""
+            ModifyOneElement(m)
+            return m
+
+
+if __name__ == "__main__":
+    GenerateConsistentMatrix(4)
+    # FunctionFun()
+    # ModifyOneElement()
+    # parser = argparse.ArgumentParser(description='Process some integers.')
+    # args = parser.parse_args()
+    #
+    # matrixFun = PairwiseMatrix()
+    # matrixFun.AddMatrixRow(['1',   '2',   '10'])
+    # matrixFun.AddMatrixRow(['1/2', '1',   '6'])
+    # matrixFun.AddMatrixRow(['1/10', '1/6', '1'])
+    #
+    # # matrixFun.AddMatrixRow(['1',      '2',     '10',    '100'])
+    # # matrixFun.AddMatrixRow(['1/2',    '1',     '5',     '50'])
+    # # matrixFun.AddMatrixRow(['1/10',   '1/5',   '1',     '10'])
+    # # matrixFun.AddMatrixRow(['1/100',  '1/50',  '1/10',  '1'])
+    #
+    # # matrixFun.AddMatrixRow(['1',       '2',       '10',      '100',  '1000'])
+    # # matrixFun.AddMatrixRow(['1/2',     '1',       '5',       '50',    '500'])
+    # # matrixFun.AddMatrixRow(['1/10',    '1/5',     '1',       '10',    '100'])
+    # # matrixFun.AddMatrixRow(['1/100',   '1/50',    '1/10',    '1',      '10'])
+    # # matrixFun.AddMatrixRow(['1/1000',  '1/500',   '1/100',   '1/10',    '1'])
+    #
+    # (noi, consistent) = matrixFun.CheckMatrixConsistency()
+    # if noi > 0:
+    #     print "Matrix not consistent"
+    #     print "Number on Inconsistencies: " + str(noi)
+    #     print consistent
+    # else:
+    #     print "Matrix consistent!"
