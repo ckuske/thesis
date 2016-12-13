@@ -142,27 +142,18 @@ class PairwiseMatrix:
                     ijTop = (int(ikNum) * int(kjNum))
                     ijBottom = int(ikDenom) * int(kjDenom)
 
-                    # (a, b) = simplify_fraction(ijTop, ijBottom)
+                    (a, b) = simplify_fraction(ijTop, ijBottom)
+                    (c, d) = simplify_fraction(int(ijNum), int(ijDenom))
 
                     if ijBottom == 0:
                         return ""
-                    common_divisor = fractions.gcd(ijTop, ijBottom)
-                    (reduced_num, reduced_den) = (ijTop / common_divisor, ijBottom / common_divisor)
-                    tup = ()
 
-                    if reduced_den == 1:  #
-                        tup = (reduced_num, reduced_den)
-                    elif common_divisor == 1:
-                        tup = (ijTop, ijBottom)
-                    else:
-                        tup = (reduced_num, reduced_den)
-                    (a, b) = tup
-
-                    if (int(a) != int(ijNum)) or (int(b) != int(ijDenom)):
-                        # print "A=" + str(a)
-                        # print "B=" + str(b)
-                        # print "ijNum=" + str(ijNum)
-                        # print "ijDenom=" + str(ijDenom)
+                    if (int(a) != int(c)) or (int(b) != int(d)):
+                        # print "a=" + str(a)
+                        # print "b=" + str(b)
+                        # print "c=" + str(c)
+                        # print "d=" + str(d)
+                        # print ""
                         self.inconsistentLocations.append([i, j, k])
                         self.inconsistenciesDetected += 1
 
@@ -189,25 +180,13 @@ class PairwiseMatrix:
                     common_divisor = fractions.gcd(a, b)
                     lcd = ((a * b) / common_divisor)
 
-                    # if thisMatrixTuple[0] != thisMatrixTuple[1]:  # if it's not a whole number
-                    #     thisMatrixTuple[0] = str(int(thisMatrixTuple[0]) * (lcd / a))
-                    #     thisMatrixTuple[1] = str(lcd)
-                    #
-                    # if otherMatrixTuple[0] != otherMatrixTuple[1]:  # if it's not a whole number
-                    #     otherMatrixTuple[0] = str(int(otherMatrixTuple[0]) * (lcd / b))
-                    #     otherMatrixTuple[1] = str(lcd)
-                    #
-                    # else:
                     if int(thisMatrixTuple[1]) != lcd:
                         thisMatrixTuple[0] = str(int(thisMatrixTuple[0]) * lcd)
                         thisMatrixTuple[1] = str(lcd)
-                        # if int(otherMatrixTuple[1]) == lcd:
-                        #    otherMatrixTuple[0] = str(int(otherMatrixTuple[0]) * lcd)
+
                     if int(otherMatrixTuple[1]) != lcd:
                         otherMatrixTuple[0] = str(int(otherMatrixTuple[0]) * lcd)
                         otherMatrixTuple[1] = str(lcd)
-                        # if int(thisMatrixTuple[1]) == lcd:
-                        #    thisMatrixTuple[0] = str(int(thisMatrixTuple[0]) * lcd)
 
                     difference = abs((float(thisMatrixTuple[0]) - float(otherMatrixTuple[0])) / lcd)
                 else:
@@ -238,70 +217,48 @@ def ParseFraction(inputStr):
     return fractionParts[0], '1'
 
 
-# def SimplifyFraction(inputStr):
-#     fractionParts = inputStr.split('/')
-#     if len(fractionParts) == 1:
-#         return inputStr  # nothing to do
-#
-#     numerator = int(fractionParts[0])
-#     denominator = int(fractionParts[1])
-#     # tup = simplify_fraction(int(numerator), int(denominator))
-#
-#     if denominator == 0:
-#         return ""
-#     common_divisor = fractions.gcd(numerator, denominator)
-#     (reduced_num, reduced_den) = (numerator / common_divisor, denominator / common_divisor)
-#     tup = ()
-#
-#     if reduced_den == 1:  #
-#         tup = (reduced_num, reduced_den)
-#     elif common_divisor == 1:
-#         tup = (numerator, denominator)
-#     else:
-#         tup = (reduced_num, reduced_den)
-#
-#     reducedFraction = str(tup[0]) + "/" + str(tup[1])
-#
-#     return reducedFraction
+def SimplifyFraction(inputStr):
+    fractionParts = inputStr.split('/')
+    if len(fractionParts) == 1:
+        return inputStr  # nothing to do
+
+    numerator = int(fractionParts[0])
+    denominator = int(fractionParts[1])
+    # tup = simplify_fraction(int(numerator), int(denominator))
+
+    if denominator == 0:
+        return ""
+    common_divisor = fractions.gcd(numerator, denominator)
+    (reduced_num, reduced_den) = (numerator / common_divisor, denominator / common_divisor)
+    tup = ()
+
+    if reduced_den == 1:  #
+        tup = (reduced_num, reduced_den)
+    elif common_divisor == 1:
+        tup = (numerator, denominator)
+    else:
+        tup = (reduced_num, reduced_den)
+
+    reducedFraction = str(tup[0]) + "/" + str(tup[1])
+
+    return reducedFraction
 
 
-# def ParseInput():
-#     global matrixInputSquares
-#     matrixStr = '1 3 5;2/6 1 10/6;1/5 3/5 1'
-#     rows = matrixStr.split(';')
-#     print "Original Input:"
-#     for i in range(0, len(rows)):
-#         row = rows[i].split()
-#         print row
-#
-#     print ""
-#     for i in range(0, len(rows)):
-#         row = rows[i].split()
-#         for j in range(0, len(row)):
-#             matrixStr = SimplifyFraction(row[j])
-#             row[j] = matrixStr
-#         matrixInputSquares.append(row)
+def simplify_fraction(numer, denom):
+    if denom == 0:
+        return "Division by 0 - result undefined"
 
+    # Remove greatest common divisor:
+    common_divisor = fractions.gcd(numer, denom)
+    (reduced_num, reduced_den) = (numer / common_divisor, denom / common_divisor)
+    # Note that reduced_den > 0 as documented in the gcd function.
 
-#
-# def simplify_fraction(numer, denom):
-#     if denom == 0:
-#         return "Division by 0 - result undefined"
-#
-#     # Remove greatest common divisor:
-#     common_divisor = fractions.gcd(numer, denom)
-#     (reduced_num, reduced_den) = (numer / common_divisor, denom / common_divisor)
-#     # Note that reduced_den > 0 as documented in the gcd function.
-#
-#     if reduced_den == 1:  #
-#         #print "%d/%d is simplified to %d" % (numer, denom, reduced_num)
-#         return reduced_num, reduced_den
-#     elif common_divisor == 1:
-#         #print "%d/%d is already at its most simplified state" % (numer, denom)
-#         return numer, denom
-#     else:
-#         #print "%d/%d is simplified to %d/%d" % (numer, denom, reduced_num, reduced_den)
-#         return reduced_num, reduced_den
+    if reduced_den == 1:  #
+        return reduced_num, reduced_den
+    elif common_divisor == 1:
+        return numer, denom
+    else:
+        return reduced_num, reduced_den
 
 
 def GetNumeratorDenominator(fractionStr):
@@ -313,6 +270,7 @@ def GetNumeratorDenominator(fractionStr):
 
 
 def ModifyOneElement(m):
+
     for i in range(0, m.GetSize()):
         for j in range(0, m.GetSize()):
 
@@ -321,100 +279,68 @@ def ModifyOneElement(m):
 
             oldVal = m.GetItem(i, j)
             oldVal2 = m.GetItem(j, i)
-            m.SetItem(i, j, str(int(oldVal) + 1))
-            m.SetItem(j, i, '1/' + str(int(oldVal) + 1))
-            m.PrintMatrix()
+
+            if '/' in oldVal:
+                num = oldVal.split('/')[0]
+                denom = oldVal.split('/')[1]
+                newVal = str(int(num) + 1) + '/' + denom
+                m.SetItem(i, j, newVal)
+                newVal = denom + '/' + str(int(num) + 1)
+                m.SetItem(j, i, newVal)
+            else:
+                m.SetItem(i, j, str(int(oldVal) + 1))
+                m.SetItem(j, i, '1/' + str(int(oldVal) + 1))
+
+            # print "Altered matrix: "
+            # m.PrintMatrix()
+            # print ""
 
             (noi, consistent) = m.CheckMatrixConsistency()
             if noi > 0:
-                print "Number on Inconsistencies: " + str(noi)
+                # print "Number on Inconsistencies: " + str(noi)
 
                 if noi != (6 * (m.GetSize() - 2)):
-                    print "Unexpected number of inconsistencies!"
+                    print "Unexpected number of inconsistencies, should have been " + str(6 * (m.GetSize() - 2))
                     return
 
                 m.SetItem(i, j, oldVal)
                 m.SetItem(j, i, oldVal2)
                 m.ResetInconsistencyData()
-                # break
             else:
                 m.SetItem(i, j, oldVal)
                 m.SetItem(j, i, oldVal2)
                 m.ResetInconsistencyData()
-                # if noi > 0:
-                #     break
-    if noi == (6 * (m.GetSize() - 2)):
-        print ""
-        print "Expected number of inconsistencies found, great!"
 
-
-def FunctionFun():
-    for i in range(0, 10 + 1):
-        # print str(i) + "->" + str(2*(i-2) + 4*(i-2))
-        print str(i) + "->" + str(6 * (i - 2))
+    if noi > 0 and noi == (6 * (m.GetSize() - 2)):
+        print "Expected number of inconsistencies (" + str(noi) + ") found, great!"
+        return
 
 
 def GenerateConsistentMatrix(matrixSize):
     random.seed()
     while True:
         lists = []
-        m = PairwiseMatrix()
-        for i in range(0, matrixSize):
-            l = random.sample(range(2, 81), matrixSize)
-            # l.sort()
-            # print l
-            lists.append(l)
-
+        m = PairwiseMatrix([['1' for count in range(matrixSize)] for count in range(matrixSize)])
+        w = random.sample(range(2, matrixSize * matrixSize), matrixSize)
+        w.sort()
+        print ""
+        print "Random numbers: " + str(w)
         for i in range(0, matrixSize):
             for j in range(0, matrixSize):
-                lists[i][j] = str(lists[i][j])
-                if i == j:
-                    lists[i][j] = '1'
-                if i > j:
-                    lists[i][j] = '1' + '/' + str(lists[j][i])
-            m.AddMatrixRow(lists[i])
-            # print lists[i]
-        print ""
-        m.PrintMatrix()
-        lists = []
+                if j > i:
+                    m.SetItem(i, j, str(w[i]) + '/' + str(w[j]))
+                    m.SetItem(j, i, str(w[j]) + '/' + str(w[i]))
+
         (noi, consistent) = m.CheckMatrixConsistency()
 
         if noi == 0:
-            print ""
-            print "Matrix selected"
             m.PrintMatrix()
-            print ""
+            m.ResetInconsistencyData()
             ModifyOneElement(m)
-            return m
+            return
+
 
 
 if __name__ == "__main__":
-    GenerateConsistentMatrix(3)
-    # FunctionFun()
-    # ModifyOneElement()
-    # parser = argparse.ArgumentParser(description='Process some integers.')
-    # args = parser.parse_args()
-    #
-    # matrixFun = PairwiseMatrix()
-    # matrixFun.AddMatrixRow(['1',   '2',   '10'])
-    # matrixFun.AddMatrixRow(['1/2', '1',   '6'])
-    # matrixFun.AddMatrixRow(['1/10', '1/6', '1'])
-    #
-    # # matrixFun.AddMatrixRow(['1',      '2',     '10',    '100'])
-    # # matrixFun.AddMatrixRow(['1/2',    '1',     '5',     '50'])
-    # # matrixFun.AddMatrixRow(['1/10',   '1/5',   '1',     '10'])
-    # # matrixFun.AddMatrixRow(['1/100',  '1/50',  '1/10',  '1'])
-    #
-    # # matrixFun.AddMatrixRow(['1',       '2',       '10',      '100',  '1000'])
-    # # matrixFun.AddMatrixRow(['1/2',     '1',       '5',       '50',    '500'])
-    # # matrixFun.AddMatrixRow(['1/10',    '1/5',     '1',       '10',    '100'])
-    # # matrixFun.AddMatrixRow(['1/100',   '1/50',    '1/10',    '1',      '10'])
-    # # matrixFun.AddMatrixRow(['1/1000',  '1/500',   '1/100',   '1/10',    '1'])
-    #
-    # (noi, consistent) = matrixFun.CheckMatrixConsistency()
-    # if noi > 0:
-    #     print "Matrix not consistent"
-    #     print "Number on Inconsistencies: " + str(noi)
-    #     print consistent
-    # else:
-    #     print "Matrix consistent!"
+    for i in range(3, 10):
+        GenerateConsistentMatrix(i)

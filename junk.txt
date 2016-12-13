@@ -67,3 +67,11 @@
     # p2.AddMatrixRow(['1/5', '7/10', '1'])
     # p2.PrintMatrix()
 
+    # matrixFun.AddMatrixRow(['1',   '2',   '10'])
+    # matrixFun.AddMatrixRow(['1/2', '1',   '5'])
+    # matrixFun.AddMatrixRow(['1/10', '1/5', '1'])
+
+    matrixFun.AddMatrixRow(['1',      '2',     '10',    '100'])
+    matrixFun.AddMatrixRow(['1/2',    '1',     '5',     '50'])
+    matrixFun.AddMatrixRow(['1/10',   '1/5',   '1',     '10'])
+    matrixFun.AddMatrixRow(['1/100',  '1/50',  '1/10',  '1'])
