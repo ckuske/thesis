@@ -34,7 +34,7 @@ class PairwiseMatrix:
 
         self.inconsistentLocations = []
         self.inconsistenciesDetected = 0
-        self.greatestDistanceLocation = []
+        self.greatestDistanceLocation = []  
         self.greatestDistanceValue = 0
 
     def ResetInconsistencyData(self):
@@ -316,6 +316,64 @@ def ModifyOneElement(m):
         return
 
 
+def ModifyTwoElements(m):
+    i = 0
+    j = 1
+    oldVal = m.GetItem(i, j)
+    oldVal2 = m.GetItem(j, i)
+
+    if '/' in oldVal:
+        num = oldVal.split('/')[0]
+        denom = oldVal.split('/')[1]
+        newVal = str(int(num) + 1) + '/' + denom
+        m.SetItem(i, j, newVal)
+        newVal = denom + '/' + str(int(num) + 1)
+        m.SetItem(j, i, newVal)
+    else:
+        m.SetItem(i, j, str(int(oldVal) + 1))
+        m.SetItem(j, i, '1/' + str(int(oldVal) + 1))
+
+    i = 1
+    j = 2
+    oldVal = m.GetItem(i, j)
+    oldVal2 = m.GetItem(j, i)
+
+    if '/' in oldVal:
+        num = oldVal.split('/')[0]
+        denom = oldVal.split('/')[1]
+        newVal = str(int(num) + 1) + '/' + denom
+        m.SetItem(i, j, newVal)
+        newVal = denom + '/' + str(int(num) + 1)
+        m.SetItem(j, i, newVal)
+    else:
+        m.SetItem(i, j, str(int(oldVal) + 1))
+        m.SetItem(j, i, '1/' + str(int(oldVal) + 1))
+
+    # print "Altered matrix: "
+    # m.PrintMatrix()
+    # print ""
+
+    (noi, consistent) = m.CheckMatrixConsistency()
+    if noi > 0:
+        # print "Number on Inconsistencies: " + str(noi)
+
+        if noi != (6 * (m.GetSize() - 2)):
+            print "Unexpected number of inconsistencies (" + str(noi) + "), should have been " + str(
+                6 * (m.GetSize() - 2))
+            return
+
+        m.SetItem(i, j, oldVal)
+        m.SetItem(j, i, oldVal2)
+        m.ResetInconsistencyData()
+    else:
+        m.SetItem(i, j, oldVal)
+        m.SetItem(j, i, oldVal2)
+        m.ResetInconsistencyData()
+
+    if noi > 0 and noi == (6 * (m.GetSize() - 2)):
+        print "Expected number of inconsistencies (" + str(noi) + ") found, great!"
+        return
+
 def GenerateConsistentMatrix(matrixSize):
     random.seed()
     while True:
@@ -336,11 +394,11 @@ def GenerateConsistentMatrix(matrixSize):
         if noi == 0:
             m.PrintMatrix()
             m.ResetInconsistencyData()
-            ModifyOneElement(m)
+            ModifyTwoElements(m)
             return
 
 
 
 if __name__ == "__main__":
-    for i in range(3, 10):
+    for i in range(3, 10 + 1):
         GenerateConsistentMatrix(i)
