@@ -13,6 +13,11 @@
 
 # http://www.isc.senshu-u.ac.jp/~thc0456/EAHP/AHPweb.html
 
+
+# see how many inconsistencies need to be added for the entire matrix to be altered (except the diagonal)
+# determine what causes the number of inconsistencies to vary between runs when there are two or more inconsistencies (side by side, on the same line (horizontal or diagonal) etc)
+# diagrams - show when an inconsistency introduced, which items are affected (xfig, omnigraffle) 'include graphics' command in LaTeX
+
 import copy
 import fractions
 import random
@@ -87,6 +92,14 @@ class PairwiseMatrix:
                 return False
         return True
 
+    def GetElementsAboveDiagonal(self):
+        outList = []
+        for i in range(0, self.GetSize()):
+            for j in range(0, self.GetSize()):
+                if j > i:
+                    outList.append([j, i])
+        return outList
+
     def CheckMatrixConsistency(self):
 
         self.inconsistenciesDetected = 0
@@ -100,10 +113,10 @@ class PairwiseMatrix:
                         continue
 
                     #Dij = Dik * Dkj
-                    # print "i=" + str(i) + ", j=" + str(j) + ", k=" + str(k) + " -> " + \
-                    #      str(self.GetItem(i, k)) + "[" + str(i) + "," + str(k) + "] * " + str(
-                    #      self.GetItem(k, j)) + "[" + str(
-                    #      k) + "," + str(j) + "] should be " + str(self.GetItem(i, j))
+                    print "i=" + str(i) + ", j=" + str(j) + ", k=" + str(k) + " -> " + \
+                          str(self.GetItem(i, k)) + "[" + str(i) + "," + str(k) + "] * " + str(
+                        self.GetItem(k, j)) + "[" + str(
+                        k) + "," + str(j) + "] should be " + str(self.GetItem(i, j))
 
                     # get i,j
                     (ijNum, ijDenom) = (0, 0)
@@ -142,18 +155,18 @@ class PairwiseMatrix:
                     ijTop = (int(ikNum) * int(kjNum))
                     ijBottom = int(ikDenom) * int(kjDenom)
 
-                    (a, b) = simplify_fraction(ijTop, ijBottom)
-                    (c, d) = simplify_fraction(int(ijNum), int(ijDenom))
+                    (ijTopSimplified, ijBottomSimplified) = simplify_fraction(ijTop, ijBottom)
+                    (ijTopReal, ijBottomReal) = simplify_fraction(int(ijNum), int(ijDenom))
 
                     if ijBottom == 0:
                         return ""
 
-                    if (int(a) != int(c)) or (int(b) != int(d)):
-                        # print "a=" + str(a)
-                        # print "b=" + str(b)
-                        # print "c=" + str(c)
-                        # print "d=" + str(d)
-                        # print ""
+                    if (int(ijTopSimplified) != int(ijTopReal)) or (int(ijBottomSimplified) != int(ijBottomReal)):
+                        print "ijTopSimplified=" + str(ijTopSimplified)
+                        print "ijBottomSimplified=" + str(ijBottomSimplified)
+                        print "ijTopReal=" + str(ijTopReal)
+                        print "ijBottomReal=" + str(ijBottomReal)
+                        print ""
                         self.inconsistentLocations.append([i, j, k])
                         self.inconsistenciesDetected += 1
 
@@ -316,59 +329,61 @@ def ModifyOneElement(m):
         return
 
 
-def ModifyTwoElements(m):
-    i = 0
-    j = 1
-    oldVal = m.GetItem(i, j)
-    oldVal2 = m.GetItem(j, i)
+def ModifyElements(m, elementsToChange):
+    positions = []
+    prevValues = []
+    k = 0
+    for i in range(0, m.GetSize()):
+        for j in range(0, m.GetSize()):
+            if j > i:
+                k = k + 1
+                if j < m.GetSize():
+                    positions.append([i,j])
 
-    if '/' in oldVal:
-        num = oldVal.split('/')[0]
-        denom = oldVal.split('/')[1]
-        newVal = str(int(num) + 1) + '/' + denom
-        m.SetItem(i, j, newVal)
-        newVal = denom + '/' + str(int(num) + 1)
-        m.SetItem(j, i, newVal)
-    else:
-        m.SetItem(i, j, str(int(oldVal) + 1))
-        m.SetItem(j, i, '1/' + str(int(oldVal) + 1))
+    positions = random.sample(positions, elementsToChange)
 
-    i = 1
-    j = 2
-    oldVal = m.GetItem(i, j)
-    oldVal2 = m.GetItem(j, i)
+    oldValues = []
 
-    if '/' in oldVal:
-        num = oldVal.split('/')[0]
-        denom = oldVal.split('/')[1]
-        newVal = str(int(num) + 1) + '/' + denom
-        m.SetItem(i, j, newVal)
-        newVal = denom + '/' + str(int(num) + 1)
-        m.SetItem(j, i, newVal)
-    else:
-        m.SetItem(i, j, str(int(oldVal) + 1))
-        m.SetItem(j, i, '1/' + str(int(oldVal) + 1))
+    for k in range(0, len(positions)):
+        i = positions[k][0]
+        j = positions[k][1]
+        oldVal = m.GetItem(i, j)
 
-    # print "Altered matrix: "
+        oldValues.append([m.GetItem(i, j), m.GetItem(j, i)])
+
+        if '/' in oldVal:
+            num = oldVal.split('/')[0]
+            denom = oldVal.split('/')[1]
+            # newVal = str(int(num) + 1) + '/' + denom
+            newVal = "999/999"
+            m.SetItem(i, j, newVal)
+            # newVal = denom + '/' + str(int(num) + 1)
+            m.SetItem(j, i, newVal)
+        else:
+            m.SetItem(i, j, "999/999")
+            m.SetItem(j, i, "999/999")
+
+    print "Altered matrix: "
+    m.PrintMatrix()
+    print ""
+    #
+    # print oldValues
+
+    (noi, consistent) = m.CheckMatrixConsistency()
+
+    for k in range(0, len(oldValues)):
+        m.SetItem(positions[k][0], positions[k][1], oldValues[k][0])
+        m.SetItem(positions[k][1], positions[k][0], oldValues[k][1])
+        m.ResetInconsistencyData()
+
+    # print "Original matrix? "
     # m.PrintMatrix()
     # print ""
 
-    (noi, consistent) = m.CheckMatrixConsistency()
     if noi > 0:
-        # print "Number on Inconsistencies: " + str(noi)
-
         if noi != (6 * (m.GetSize() - 2)):
-            print "Unexpected number of inconsistencies (" + str(noi) + "), should have been " + str(
-                6 * (m.GetSize() - 2))
+            print "Unexpected number of inconsistencies (" + str(noi) + "), should have been " + str(6 * (m.GetSize() - 2))
             return
-
-        m.SetItem(i, j, oldVal)
-        m.SetItem(j, i, oldVal2)
-        m.ResetInconsistencyData()
-    else:
-        m.SetItem(i, j, oldVal)
-        m.SetItem(j, i, oldVal2)
-        m.ResetInconsistencyData()
 
     if noi > 0 and noi == (6 * (m.GetSize() - 2)):
         print "Expected number of inconsistencies (" + str(noi) + ") found, great!"
@@ -379,26 +394,58 @@ def GenerateConsistentMatrix(matrixSize):
     while True:
         lists = []
         m = PairwiseMatrix([['1' for count in range(matrixSize)] for count in range(matrixSize)])
-        w = random.sample(range(2, matrixSize * matrixSize), matrixSize)
+        w = random.sample(range(2, pow(matrixSize, 3)), matrixSize*10)
         w.sort()
         print ""
         print "Random numbers: " + str(w)
-        for i in range(0, matrixSize):
-            for j in range(0, matrixSize):
-                if j > i:
-                    m.SetItem(i, j, str(w[i]) + '/' + str(w[j]))
-                    m.SetItem(j, i, str(w[j]) + '/' + str(w[i]))
+        c = 0
+        idx = 0
 
+        matrixElements = m.GetElementsAboveDiagonal()
+        for i in range(0, len(matrixElements)):
+            choice1 = random.choice(w)
+            choice2 = random.choice(w)
+            m.SetItem(matrixElements[i][0], matrixElements[i][1], str(choice1) + '/' + str(choice2))
+            m.SetItem(matrixElements[i][1], matrixElements[i][0], str(choice2) + '/' + str(choice1))
+
+        m.PrintMatrix()
+        # for i in range(0, matrixSize):
+        #     for j in range(0, matrixSize):
+        #         if j > i:
+        #             m.SetItem(i, j, str(w[i]) + '/' + str(w[j]))
+        #             m.SetItem(j, i, str(w[j]) + '/' + str(w[i]))
+        #             c += 2
+        #             idx += 1
+        # print m.GetElementsAboveDiagonal()
+        #
+        # print c
         (noi, consistent) = m.CheckMatrixConsistency()
 
         if noi == 0:
             m.PrintMatrix()
             m.ResetInconsistencyData()
-            ModifyTwoElements(m)
+            ModifyElements(m,2)
             return
 
 
 
 if __name__ == "__main__":
-    for i in range(3, 10 + 1):
+    for i in range(4, 5):
         GenerateConsistentMatrix(i)
+
+        # m.AddMatrixRow(['1', '18/31', '18/51', '18/55'])
+        # m.AddMatrixRow(['31/18', '1', '31/51', '31/55'])
+        # m.AddMatrixRow(['51/18', '51/31', '1', '51/55'])
+        # m.AddMatrixRow(['55/18', '55/31', '55/51', '1'])
+
+        # m = PairwiseMatrix()
+        # m.AddMatrixRow(['1', '18/31', '18/51', '18/55'])
+        # m.AddMatrixRow(['31/18', '1', '31/51', '31/55'])
+        # m.AddMatrixRow(['51/18', '51/31', '1', '51/55'])
+        # m.AddMatrixRow(['55/18', '55/31', '55/51', '1'])
+        # m.PrintMatrix()
+        # (noi, consistent) = m.CheckMatrixConsistency()
+        # print "Inconsistencies: " + str(noi)
+        # if noi > 0:
+        #     if noi != (6 * (m.GetSize() - 2)):
+        #         print "Unexpected number of inconsistencies (" + str(noi) + "), should have been " + str(6 * (m.GetSize() - 2))
