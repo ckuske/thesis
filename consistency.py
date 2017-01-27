@@ -347,6 +347,7 @@ def modify_elements(m, elements_to_change):
             new_val = "998/999"
             m.set_item(i, j, new_val)
             # new_val = denom + '/' + str(int(num) + 1)
+            new_val = "999/998"
             m.set_item(j, i, new_val)
         else:
             m.set_item(i, j, "999/999")
@@ -399,7 +400,7 @@ def generate_consistent_matrix(matrix_size):
     while True:
         rounds_required += 1
 
-        l = np.random.randint(pow(matrix_size, matrix_size), size=(matrix_size, matrix_size))
+        l = np.random.randint(pow(matrix_size, 3), size=(matrix_size, matrix_size))
         m = PairwiseMatrix(make_all_ones_matrix(matrix_size))
 
         #   matrix_elements = m.get_elements_below_diagonal()
@@ -417,14 +418,29 @@ def generate_consistent_matrix(matrix_size):
             print "Rounds required: " + str(rounds_required)
             m.print_matrix()
             m.reset_inconsistency_data()
-            modify_elements(m, 1)
+            modify_elements(m, 45)
             return
 
 
 if __name__ == "__main__":
 
-    for idx in range(4, 5):
+    for idx in range(10, 11):
         generate_consistent_matrix(idx)
+
+        # 3 == 3 = 0
+        # 4 == 6 = 2
+        # 5 == 10 = 5
+        # 6 == 15  = 9
+        # 7 == 21 = 14
+        # 8 == 28 = 20
+        # 9 == 36 = 27
+        # 10 == 45 = 35
+
+    n = 1
+    for i in range(2, 11):
+        print (str(i) + ":" + str(n))
+        n += (i)
+
 
         # m.add_matrix_row(['1', '18/31', '18/51', '18/55'])
         # m.add_matrix_row(['31/18', '1', '31/51', '31/55'])
