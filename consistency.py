@@ -15,7 +15,7 @@
 # http://www.isc.senshu-u.ac.jp/~thc0456/EAHP/AHPweb.html
 
 
-# see how many inconsistencies need to be added for the entire matrix to be altered (except the diagonal)
+# see how many inconsistencies need to be added for the entire matrix to be altered (except the diagonal) == (n(n+1))/2
 
 # determine what causes the number of inconsistencies to vary between runs when there are two or
 # more inconsistencies (side by side, on the same line (horizontal or diagonal) etc)
@@ -173,18 +173,23 @@ class PairwiseMatrix:
                     ij_bottom = int(ik_denom) * int(kj_denom)
 
                     (ij_top_simplified, ij_bottom_simplified) = simplify_fraction(ij_top, ij_bottom)
+
+                    if ij_top_simplified == 0:
+                        return (-1, -1)
+
                     (ij_top_real, ij_bottom_real) = simplify_fraction(int(ij_num), int(ij_denom))
 
                     if ij_bottom == 0:
-                        return ""
+                        return (-1, -1)
 
                     if (int(ij_top_simplified) != int(ij_top_real)) or \
                             (int(ij_bottom_simplified) != int(ij_bottom_real)):
-                        print "ijTopSimplified=" + str(ij_top_simplified)
-                        print "ij_bottom_simplified=" + str(ij_bottom_simplified)
-                        print "ij_top_real=" + str(ij_top_real)
-                        print "ij_bottom_real=" + str(ij_bottom_real)
-                        print ""
+                        if verboseCount >= 2:
+                            print "ijTopSimplified=" + str(ij_top_simplified)
+                            print "ij_bottom_simplified=" + str(ij_bottom_simplified)
+                            print "ij_top_real=" + str(ij_top_real)
+                            print "ij_bottom_real=" + str(ij_bottom_real)
+                            print ""
                         self.inconsistent_locations.append([i, j, k])
                         self.inconsistencies_detected += 1
 
@@ -249,7 +254,7 @@ def parse_fraction(input_str):
 
 def simplify_fraction(numer, denom):
     if denom == 0:
-        return "Division by 0 - result undefined"
+        return 0, 0
 
     # Remove greatest common divisor:
     common_divisor = fractions.gcd(numer, denom)
@@ -418,13 +423,14 @@ def generate_consistent_matrix(matrix_size):
             print "Rounds required: " + str(rounds_required)
             m.print_matrix()
             m.reset_inconsistency_data()
-            modify_elements(m, 45)
+            modify_elements(m, 2)
             return
 
 
 if __name__ == "__main__":
 
-    for idx in range(10, 11):
+    verboseCount = 0
+    for idx in range(4, 5):
         generate_consistent_matrix(idx)
 
         # 3 == 3 = 0
@@ -436,11 +442,13 @@ if __name__ == "__main__":
         # 9 == 36 = 27
         # 10 == 45 = 35
 
-    n = 1
-    for i in range(2, 11):
-        print (str(i) + ":" + str(n))
-        n += (i)
+        # n = 1
+        # for n in range(1,11):
+        #     print n*(1+n)/2
 
+        # for j in range(2, 11):
+        #     print (str(n))
+        #     n += (j)
 
         # m.add_matrix_row(['1', '18/31', '18/51', '18/55'])
         # m.add_matrix_row(['31/18', '1', '31/51', '31/55'])
