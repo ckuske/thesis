@@ -405,7 +405,7 @@ def generate_consistent_matrix(matrix_size):
     while True:
         rounds_required += 1
 
-        l = np.random.randint(pow(matrix_size, 3), size=(matrix_size, matrix_size))
+        l = np.random.randint(2, pow(matrix_size, 3), size=(matrix_size, matrix_size))
         m = PairwiseMatrix(make_all_ones_matrix(matrix_size))
 
         #   matrix_elements = m.get_elements_below_diagonal()
@@ -423,11 +423,23 @@ def generate_consistent_matrix(matrix_size):
             print "Rounds required: " + str(rounds_required)
             m.print_matrix()
             m.reset_inconsistency_data()
-            modify_elements(m, 2)
+            # modify_elements(m, 2)
             return
 
 
 if __name__ == "__main__":
+
+    # 4x4 matrix
+    # 24 instead of 18 inconsistencies
+    # [0,2], [1,3]
+    # [0,1], [2,3]
+    # [0,3], [1,2]
+
+
+    # on same line [1,2], [1,3] - 12 inconsistencies instead of 18!
+    # but one another line [0,2], [0,3] - 18 instead of 12
+
+
 
     verboseCount = 0
     for idx in range(4, 5):
