@@ -66,9 +66,11 @@ class PairwiseMatrix:
         self.matrix_data.append(new_row)
         self.matrix_size += 1
 
-    def print_matrix(self):
+    def print_matrix(self, add_trailing_whitespace=False):
         for i in range(0, self.matrix_size):
             print self.matrix_data[i]
+        if add_trailing_whitespace:
+            print ""
 
     def get_size(self):
         return self.matrix_size
@@ -119,6 +121,7 @@ class PairwiseMatrix:
 
     def check_matrix_consistency(self):
 
+        self.inconsistent_locations = []
         self.inconsistencies_detected = 0
         n = self.matrix_size
 
@@ -130,10 +133,10 @@ class PairwiseMatrix:
                         continue
 
                     # Dij = Dik * Dkj
-                    # print "i=" + str(i) + ", j=" + str(j) + ", k=" + str(k) + " -> " + \
-                    #       str(self.get_item(i, k)) + "[" + str(i) + "," + str(k) + "] * " + str(
-                    #     self.get_item(k, j)) + "[" + str(
-                    #     k) + "," + str(j) + "] should be " + str(self.get_item(i, j))
+                    if verboseCount > 1:
+                        print "i={0}, j={1}, k={2} -> {3}[{4},{5}] * {6}[{7},{8}] should be {9}".format(
+                            str(i), str(j), str(k), str(self.get_item(i, k)), str(i), str(k),
+                            str(self.get_item(k, j)), str(k), str(j), str(self.get_item(i, j)))
 
                     # get i,j
                     # (ij_num, ij_denom) = (0, 0)
@@ -202,9 +205,11 @@ class PairwiseMatrix:
             for j in range(0, self.matrix_size):
 
                 this_matrix_tuple = list(parse_fraction(self.get_item(i, j)))
+                this_matrix_tuple = list(simplify_fraction(int(this_matrix_tuple[0]), int(this_matrix_tuple[1])))
                 # this_matrix_is_ones = (this_matrix_tuple[0] == this_matrix_tuple[1])
 
                 other_matrix_tuple = list(parse_fraction(o_matrix.get_item(i, j)))
+                other_matrix_tuple = list(simplify_fraction(int(other_matrix_tuple[0]), int(other_matrix_tuple[1])))
                 # other_matrix_is_ones = (other_matrix_tuple[0] == other_matrix_tuple[1])
 
                 # if this_matrix_tuple[0] == this_matrix_tuple[1]
@@ -428,54 +433,45 @@ def generate_consistent_matrix(matrix_size):
 
 
 if __name__ == "__main__":
-
-    # 4x4 matrix
-    # 24 instead of 18 inconsistencies
-    # [0,2], [1,3]
-    # [0,1], [2,3]
-    # [0,3], [1,2]
-
-
-    # on same line [1,2], [1,3] - 12 inconsistencies instead of 18!
-    # but one another line [0,2], [0,3] - 18 instead of 12
-
-
-
     verboseCount = 0
-    for idx in range(4, 5):
-        generate_consistent_matrix(idx)
 
-        # 3 == 3 = 0
-        # 4 == 6 = 2
-        # 5 == 10 = 5
-        # 6 == 15  = 9
-        # 7 == 21 = 14
-        # 8 == 28 = 20
-        # 9 == 36 = 27
-        # 10 == 45 = 35
+    m = PairwiseMatrix()
+    # m.add_matrix_row(['1', '18/31', '18/51', '18/55'])
+    # m.add_matrix_row(['31/18', '1', '31/51', '31/55'])
+    # m.add_matrix_row(['51/18', '51/31', '1', '51/55'])
+    # m.add_matrix_row(['55/18', '55/31', '55/51', '1'])
+    m.add_matrix_row(['1', '2', '10', '100'])
+    m.add_matrix_row(['1/2', '1', '5', '50'])
+    m.add_matrix_row(['1/10', '1/5', '1', '10'])
+    m.add_matrix_row(['1/100', '1/50', '1/10', '1'])
 
-        # n = 1
-        # for n in range(1,11):
-        #     print n*(1+n)/2
+    m2 = copy.deepcopy(m)
+    m2.set_item(0, 1, '19/31')
+    m2.set_item(1, 0, '31/19')
+    m.print_matrix(True)
+    m2.print_matrix(True)
 
-        # for j in range(2, 11):
-        #     print (str(n))
-        #     n += (j)
+    print m.get_distance(m2)
+    (noi, consistent) = m2.check_matrix_consistency()
+    print "Inconsistencies: " + str(noi)
 
-        # m.add_matrix_row(['1', '18/31', '18/51', '18/55'])
-        # m.add_matrix_row(['31/18', '1', '31/51', '31/55'])
-        # m.add_matrix_row(['51/18', '51/31', '1', '51/55'])
-        # m.add_matrix_row(['55/18', '55/31', '55/51', '1'])
+    print m2.inconsistent_locations
 
-        # m = PairwiseMatrix()
-        # m.add_matrix_row(['1', '18/31', '18/51', '18/55'])
-        # m.add_matrix_row(['31/18', '1', '31/51', '31/55'])
-        # m.add_matrix_row(['51/18', '51/31', '1', '51/55'])
-        # m.add_matrix_row(['55/18', '55/31', '55/51', '1'])
-        # m.print_matrix()
-        # (noi, consistent) = m.check_matrix_consistency()
-        # print "Inconsistencies: " + str(noi)
-        # if noi > 0:
-        #     if noi != (6 * (m.get_size() - 2)):
-        #          print "Unexpected number of inconsistencies (" + str(noi) + "), should have been "\
-        #                + str(6 * (m.get_size() - 2))
+    m2.set_item(0, 1, '80/40')
+    m2.set_item(1, 0, '40/80')
+    m.print_matrix(True)
+    m2.print_matrix(True)
+
+    print m.get_distance(m2)
+    (noi, consistent) = m2.check_matrix_consistency()
+    print "Inconsistencies: " + str(noi)
+
+    print m2.inconsistent_locations
+
+    # it seems like the locations that have the real problem have more entries in the list of inconsistent locations,
+    # where the only difference is [i,j]
+
+    #     # if noi > 0:
+    #     #     if noi != (6 * (m.get_size() - 2)):
+    #     #          print "Unexpected number of inconsistencies (" + str(noi) + "), should have been "\
+    #     #                + str(6 * (m.get_size() - 2))
