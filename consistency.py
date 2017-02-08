@@ -249,6 +249,24 @@ class PairwiseMatrix:
                     # print "Difference [" + str(i) + "," + str(j) + "]= " + str(abs(difference))
         return total_distance, differences_noted
 
+    def get_most_inconsistent_tuples(self):
+        bad_places = []
+        for i in range(0, len(self.inconsistent_locations)):
+            l = self.inconsistent_locations[i]
+            for j in range(i + 1, len(self.inconsistent_locations)):
+                if self.inconsistent_locations[i][0] == self.inconsistent_locations[j][0] and \
+                                self.inconsistent_locations[i][1] == self.inconsistent_locations[j][
+                            1]:  # compare i,j only (not k)
+                    bad_places.append(self.inconsistent_locations[i])
+        return bad_places
+
+
+############## END OF CLASS ########################
+
+def are_two_tuples_reciprocals(i, j, k, l):
+    if i == l and j == k:
+        return True
+    return False
 
 def parse_fraction(input_str):
     fraction_parts = input_str.split('/')
@@ -456,6 +474,7 @@ if __name__ == "__main__":
     print "Inconsistencies: " + str(noi)
 
     print m2.inconsistent_locations
+    print m2.get_most_inconsistent_tuples()
 
     m2.set_item(0, 1, '80/40')
     m2.set_item(1, 0, '40/80')
