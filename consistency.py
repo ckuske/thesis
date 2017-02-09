@@ -250,6 +250,7 @@ class PairwiseMatrix:
         return total_distance, differences_noted
 
     def get_most_inconsistent_tuples(self):
+        abvDiag = self.get_elements_above_diagonal()
         bad_places = []
         for i in range(0, len(self.inconsistent_locations)):
             l = self.inconsistent_locations[i]
@@ -257,7 +258,8 @@ class PairwiseMatrix:
                 if self.inconsistent_locations[i][0] == self.inconsistent_locations[j][0] and \
                                 self.inconsistent_locations[i][1] == self.inconsistent_locations[j][
                             1]:  # compare i,j only (not k)
-                    bad_places.append(self.inconsistent_locations[i])
+                    if [self.inconsistent_locations[i][0], self.inconsistent_locations[i][1]] in abvDiag:
+                        bad_places.append([self.inconsistent_locations[i][0], self.inconsistent_locations[i][1]])
         return bad_places
 
 
@@ -450,6 +452,61 @@ def generate_consistent_matrix(matrix_size):
             return
 
 
+# 1. start with a random matrix (M) that has at least one inconsistency
+# 2. Generate another matrix (M') that is a copy of M.
+
+# 3. attempt to solve the inconsistencies in M' by doing the following:
+# 4. identify the tuples that involve the most [i,k] regardless of k and put in list badTuples
+# 5. pick a tuple
+#
+
+# 6. recompute the distance between M and M'
+def solve_inconsistencies(m):
+    m2 = copy.deepcopy(m)
+
+    m2.set_item(0, 1, '19/31')  # pre-seed it with bad juju
+    m2.set_item(1, 0, '31/19')
+
+    while True:
+        m2.check_matrix_consistency()
+        badTups = m2.get_most_inconsistent_tuples()
+        print badTups
+        print "Distance from m: " + str(m.get_distance(m2)[0])
+        (noi, consistent) = m2.check_matrix_consistency()
+        print "Inconsistencies: " + str(noi)
+        return
+
+        # for i in range(0,len(badTups)):
+        #     m2.matrix_data[]
+
+
+        # m2 = copy.deepcopy(m)
+        # m2.set_item(0, 1, '19/31')
+        # m2.set_item(1, 0, '31/19')
+        # m.print_matrix(True)
+        # m2.print_matrix(True)
+        #
+        # print "Distance from m: " + str(m.get_distance(m2)[0])
+        # (noi, consistent) = m2.check_matrix_consistency()
+        # print "Inconsistencies: " + str(noi)
+        #
+        # print ""
+        # print "Inconsistent locations: " + str(m2.inconsistent_locations)
+        # print "Most inconsistent tuples: " + str(m2.get_most_inconsistent_tuples())
+        # print ""
+        #
+        # m2.set_item(0, 1, '80/40')
+        # m2.set_item(1, 0, '40/80')
+        # m.print_matrix(True)
+        # m2.print_matrix(True)
+        #
+        # print "Distance from m: " + str(m.get_distance(m2)[0])
+        # (noi, consistent) = m2.check_matrix_consistency()
+        # print "Inconsistencies: " + str(noi)
+        #
+        # if noi > 0:
+        #     print m2.inconsistent_locations
+
 if __name__ == "__main__":
     verboseCount = 0
 
@@ -463,34 +520,8 @@ if __name__ == "__main__":
     m.add_matrix_row(['1/10', '1/5', '1', '10'])
     m.add_matrix_row(['1/100', '1/50', '1/10', '1'])
 
-    m2 = copy.deepcopy(m)
-    m2.set_item(0, 1, '19/31')
-    m2.set_item(1, 0, '31/19')
-    m.print_matrix(True)
-    m2.print_matrix(True)
+    solve_inconsistencies(m)
 
-    print m.get_distance(m2)
-    (noi, consistent) = m2.check_matrix_consistency()
-    print "Inconsistencies: " + str(noi)
-
-    print m2.inconsistent_locations
-    print m2.get_most_inconsistent_tuples()
-
-    m2.set_item(0, 1, '80/40')
-    m2.set_item(1, 0, '40/80')
-    m.print_matrix(True)
-    m2.print_matrix(True)
-
-    print m.get_distance(m2)
-    (noi, consistent) = m2.check_matrix_consistency()
-    print "Inconsistencies: " + str(noi)
-
-    print m2.inconsistent_locations
 
     # it seems like the locations that have the real problem have more entries in the list of inconsistent locations,
     # where the only difference is [i,j]
-
-    #     # if noi > 0:
-    #     #     if noi != (6 * (m.get_size() - 2)):
-    #     #          print "Unexpected number of inconsistencies (" + str(noi) + "), should have been "\
-    #     #                + str(6 * (m.get_size() - 2))

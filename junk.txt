@@ -33,6 +33,16 @@
     # root.mainloop()
 
 
+# 4x4 matrix
+# 24 instead of 18 inconsistencies
+# [0,2], [1,3]
+# [0,1], [2,3]
+# [0,3], [1,2]
+# on same line [1,2], [1,3] - 12 inconsistencies instead of 18!
+# but one another line [0,2], [0,3] - 18 instead of 12
+
+
+
 # def GetMatrixDiagonal():
 #     global matrix
 #     diagonals = matrix.diagonal()
@@ -75,3 +85,27 @@
     matrixFun.AddMatrixRow(['1/2',    '1',     '5',     '50'])
     matrixFun.AddMatrixRow(['1/10',   '1/5',   '1',     '10'])
     matrixFun.AddMatrixRow(['1/100',  '1/50',  '1/10',  '1'])
+
+
+
+     [0, 1, 2]
+     [0, 1, 3]
+     [1, 0, 2]
+     [1, 0, 3]
+
+     [0, 2, 1]
+     [2, 0, 1]
+
+     [0, 3, 1]
+     [3, 0, 1]
+
+     [1, 2, 0]
+     [2, 1, 0]
+
+     [1, 3, 0]      
+     [3, 1, 0]
+
+    #     # if noi > 0:
+    #     #     if noi != (6 * (m.get_size() - 2)):
+    #     #          print "Unexpected number of inconsistencies (" + str(noi) + "), should have been "\
+    #     #                + str(6 * (m.get_size() - 2))
