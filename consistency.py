@@ -108,7 +108,7 @@ class PairwiseMatrix:
         for i in range(0, self.get_size()):
             for j in range(0, self.get_size()):
                 if j > i:
-                    out_list.append([j, i])
+                    out_list.append([i, j])
         return out_list
 
     def get_elements_below_diagonal(self):
@@ -116,7 +116,7 @@ class PairwiseMatrix:
         for i in range(0, self.get_size()):
             for j in range(0, self.get_size()):
                 if i > j:
-                    out_list.append([j, i])
+                    out_list.append([i, j])
         return out_list
 
     def check_matrix_consistency(self):
@@ -457,27 +457,40 @@ def generate_consistent_matrix(matrix_size):
 
 # 3. attempt to solve the inconsistencies in M' by doing the following:
 # 4. identify the tuples that involve the most [i,k] regardless of k and put in list badTuples
-# 5. pick a tuple
+# 5. pick a tuple from badTuples
+# 6. Using the tuple selected in Step 5, increment the fraction numerator by one
+# 7. Check consistency
+# 8. If consistent, compute distance
+# 9. If first consistent matrix, store
+#10. If not the first consistent matrix found, compare distance from M to this matrix
+#11. If distance of new consistent matrix is lower than the previous candidate, store the new matrix.
 #
 
 # 6. recompute the distance between M and M'
 def solve_inconsistencies(m):
     m2 = copy.deepcopy(m)
+    goingInDistance = m.get_distance(m2)
 
     m2.set_item(0, 1, '19/31')  # pre-seed it with bad juju
     m2.set_item(1, 0, '31/19')
 
     while True:
-        m2.check_matrix_consistency()
+        (noi,foo) = m2.check_matrix_consistency()
+        if noi == 0:
+            print "Matrix is now consistent!"
+            m2.print_matrix(True)
+            return
+
         badTups = m2.get_most_inconsistent_tuples()
-        print badTups
         print "Distance from m: " + str(m.get_distance(m2)[0])
         (noi, consistent) = m2.check_matrix_consistency()
         print "Inconsistencies: " + str(noi)
-        return
 
-        # for i in range(0,len(badTups)):
-        #     m2.matrix_data[]
+
+        for i in range(0,len(badTups)):
+            print m2.matrix_data[int(badTups[i][0])][int(badTups[i][1])]
+            m2.matrix_data[int(badTups[i][0])][int(badTups[i][1])] = '2'
+            m2.matrix_data[int(badTups[i][1])][int(badTups[i][0])] = '1/2'
 
 
         # m2 = copy.deepcopy(m)
