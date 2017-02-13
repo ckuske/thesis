@@ -252,13 +252,16 @@ class PairwiseMatrix:
     def get_most_inconsistent_tuples(self):
         abvDiag = self.get_elements_above_diagonal()
         bad_places = []
+
+        if verboseCount > 0:
+            print self.inconsistent_locations
+
         for i in range(0, len(self.inconsistent_locations)):
             l = self.inconsistent_locations[i]
             for j in range(i + 1, len(self.inconsistent_locations)):
                 if self.inconsistent_locations[i][0] == self.inconsistent_locations[j][0] and \
-                                self.inconsistent_locations[i][1] == self.inconsistent_locations[j][
-                            1]:  # compare i,j only (not k)
-                    if [self.inconsistent_locations[i][0], self.inconsistent_locations[i][1]] in abvDiag:
+                                self.inconsistent_locations[i][1] == self.inconsistent_locations[j][1]:  # compare i,j only (not k)
+                    if [self.inconsistent_locations[i][0], self.inconsistent_locations[i][1]] in abvDiag: #only add tuples that are above the diagonal
                         bad_places.append([self.inconsistent_locations[i][0], self.inconsistent_locations[i][1]])
         return bad_places
 
@@ -479,6 +482,9 @@ def solve_inconsistencies(m):
     m2.set_item(1, 2, '19/31')  # pre-seed it with bad juju
     m2.set_item(2, 1, '31/19')
 
+    # m2.set_item(1, 2, '19/31')  # pre-seed it with bad juju
+    # m2.set_item(2, 1, '31/19')
+
     while True:
         (noi,foo) = m2.check_matrix_consistency()
         if noi == 0:
@@ -495,15 +501,22 @@ def solve_inconsistencies(m):
         (noi, consistent) = m2.check_matrix_consistency()
         print "Inconsistencies: " + str(noi)
 
-
-        for i in range(0,len(badTups)):
+        i = 0
+        while len(badTups) > 0:
             fraction =  m2.matrix_data[int(badTups[i][0])][int(badTups[i][1])]
             [numerator, denominator] = get_numerator_denominator(fraction)
-            print [numerator, denominator]
+            #print [numerator, denominator]
             numerator = int(numerator) + 1
             m2.matrix_data[int(badTups[i][0])][int(badTups[i][1])] = str(numerator) + "/" + str(denominator)
             m2.matrix_data[int(badTups[i][1])][int(badTups[i][0])] = str(denominator) + "/" + str(numerator)
-            m2.print_matrix(True)
+            #m2.print_matrix(True)
+            m2.check_matrix_consistency()
+            newBadTups = m2.get_most_inconsistent_tuples()
+            if not badTups[i] in newBadTups:
+                print "Inconsistency at " + str(badTups[i]) + " solved, remaining tuples: " + str(newBadTups)
+                badTups = newBadTups
+                i = 0
+                break
 
             # print m2.matrix_data[int(badTups[i][0])][int(badTups[i][1])]
             # m2.matrix_data[int(badTups[i][0])][int(badTups[i][1])] = '2'
