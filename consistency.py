@@ -454,10 +454,34 @@ def generate_consistent_matrix(matrix_size):
             # modify_elements(m, 2)
             return
 
+def generate_consistent_matrix(inputList, matrix_size):
+    random.seed()
+    rounds_required = 0
+    while True:
+        rounds_required += 1
+
+        m = PairwiseMatrix(make_all_ones_matrix(matrix_size))
+
+        #   matrix_elements = m.get_elements_below_diagonal()
+        for i in range(0, matrix_size):
+            for j in range(0, matrix_size):
+                if i == j:
+                    continue
+                m.set_item(i, j, str(inputList[i]) + '/' + str(inputList[j]))
+                m.set_item(j, i, str(inputList[j]) + '/' + str(inputList[i]))
+        m.print_matrix()
+
+        (noi, consistent) = m.check_matrix_consistency()
+
+        if noi == 0:
+            print "Rounds required: " + str(rounds_required)
+            m.print_matrix()
+            m.reset_inconsistency_data()
+            # modify_elements(m, 2)
+            return
 
 # 1. start with a random matrix (M) that has at least one inconsistency
 # 2. Generate another matrix (M') that is a copy of M.
-
 # 3. attempt to solve the inconsistencies in M' by doing the following:
 # 4. identify the tuples that involve the most [i,k] regardless of k and put in list badTuples
 # 5. pick a tuple from badTuples
@@ -468,100 +492,99 @@ def generate_consistent_matrix(matrix_size):
 #10. If not the first consistent matrix found, compare distance from M to this matrix
 #11. If distance of new consistent matrix is lower than the previous candidate, store the new matrix.
 #12.
+# def solve_inconsistencies(m):
+#     matrixSolutions = []
+#     m2 = copy.deepcopy(m)
+#     goingInDistance = m.get_distance(m2)
 #
-
-# 6. recompute the distance between M and M'
-def solve_inconsistencies(m):
-    matrixSolutions = []
-    m2 = copy.deepcopy(m)
-    goingInDistance = m.get_distance(m2)
-
-    m2.set_item(0, 1, '19/31')  # pre-seed it with bad juju
-    m2.set_item(1, 0, '31/19')
-
-    m2.set_item(1, 2, '19/31')  # pre-seed it with bad juju
-    m2.set_item(2, 1, '31/19')
-
-    # m2.set_item(1, 2, '19/31')  # pre-seed it with bad juju
-    # m2.set_item(2, 1, '31/19')
-
-    while True:
-        (noi,foo) = m2.check_matrix_consistency()
-        if noi == 0:
-            print "Matrix is now consistent!"
-            m2.print_matrix(True)
-            matrixSolutions.append((copy.deepcopy(m2),m.get_distance(m2)[0]))
-            return matrixSolutions
-
-        badTups = m2.get_most_inconsistent_tuples()
-        print badTups
-
-        print ""
-        print "Distance from m: " + str(m.get_distance(m2)[0])
-        (noi, consistent) = m2.check_matrix_consistency()
-        print "Inconsistencies: " + str(noi)
-
-        i = 0
-        while len(badTups) > 0:
-            fraction =  m2.matrix_data[int(badTups[i][0])][int(badTups[i][1])]
-            [numerator, denominator] = get_numerator_denominator(fraction)
-            #print [numerator, denominator]
-            numerator = int(numerator) + 1
-            m2.matrix_data[int(badTups[i][0])][int(badTups[i][1])] = str(numerator) + "/" + str(denominator)
-            m2.matrix_data[int(badTups[i][1])][int(badTups[i][0])] = str(denominator) + "/" + str(numerator)
-            #m2.print_matrix(True)
-            m2.check_matrix_consistency()
-            newBadTups = m2.get_most_inconsistent_tuples()
-            if not badTups[i] in newBadTups:
-                print "Inconsistency at " + str(badTups[i]) + " solved, remaining tuples: " + str(newBadTups)
-                badTups = newBadTups
-                i = 0
-                break
-
-            # print m2.matrix_data[int(badTups[i][0])][int(badTups[i][1])]
-            # m2.matrix_data[int(badTups[i][0])][int(badTups[i][1])] = '2'
-            # m2.matrix_data[int(badTups[i][1])][int(badTups[i][0])] = '1/2'
-
-
-        # m2 = copy.deepcopy(m)
-        # m2.set_item(0, 1, '19/31')
-        # m2.set_item(1, 0, '31/19')
-        # m.print_matrix(True)
-        # m2.print_matrix(True)
-        #
-        # print "Distance from m: " + str(m.get_distance(m2)[0])
-        # (noi, consistent) = m2.check_matrix_consistency()
-        # print "Inconsistencies: " + str(noi)
-        #
-        # print ""
-        # print "Inconsistent locations: " + str(m2.inconsistent_locations)
-        # print "Most inconsistent tuples: " + str(m2.get_most_inconsistent_tuples())
-        # print ""
-        #
-        # m2.set_item(0, 1, '80/40')
-        # m2.set_item(1, 0, '40/80')
-        # m.print_matrix(True)
-        # m2.print_matrix(True)
-        #
-        # print "Distance from m: " + str(m.get_distance(m2)[0])
-        # (noi, consistent) = m2.check_matrix_consistency()
-        # print "Inconsistencies: " + str(noi)
-        #
-        # if noi > 0:
-        #     print m2.inconsistent_locations
+#     m2.set_item(0, 1, '19/31')  # pre-seed it with bad juju
+#     m2.set_item(1, 0, '31/19')
+#
+#     m2.set_item(1, 2, '19/31')  # pre-seed it with bad juju
+#     m2.set_item(2, 1, '31/19')
+#
+#     # m2.set_item(1, 2, '19/31')  # pre-seed it with bad juju
+#     # m2.set_item(2, 1, '31/19')
+#
+#     while True:
+#         (noi,foo) = m2.check_matrix_consistency()
+#         if noi == 0:
+#             print "Matrix is now consistent!"
+#             m2.print_matrix(True)
+#             matrixSolutions.append((copy.deepcopy(m2),m.get_distance(m2)[0]))
+#             return matrixSolutions
+#
+#         badTups = m2.get_most_inconsistent_tuples()
+#         print badTups
+#
+#         print ""
+#         print "Distance from m: " + str(m.get_distance(m2)[0])
+#         (noi, consistent) = m2.check_matrix_consistency()
+#         print "Inconsistencies: " + str(noi)
+#
+#         i = 0
+#         while len(badTups) > 0:
+#             fraction =  m2.matrix_data[int(badTups[i][0])][int(badTups[i][1])]
+#             [numerator, denominator] = get_numerator_denominator(fraction)
+#             #print [numerator, denominator]
+#             numerator = int(numerator) + 1
+#             m2.matrix_data[int(badTups[i][0])][int(badTups[i][1])] = str(numerator) + "/" + str(denominator)
+#             m2.matrix_data[int(badTups[i][1])][int(badTups[i][0])] = str(denominator) + "/" + str(numerator)
+#             #m2.print_matrix(True)
+#             m2.check_matrix_consistency()
+#             newBadTups = m2.get_most_inconsistent_tuples()
+#             if not badTups[i] in newBadTups:
+#                 print "Inconsistency at " + str(badTups[i]) + " solved, remaining tuples: " + str(newBadTups)
+#                 badTups = newBadTups
+#                 i = 0
+#                 break
+#
+#             # print m2.matrix_data[int(badTups[i][0])][int(badTups[i][1])]
+#             # m2.matrix_data[int(badTups[i][0])][int(badTups[i][1])] = '2'
+#             # m2.matrix_data[int(badTups[i][1])][int(badTups[i][0])] = '1/2'
+#
+#
+#         # m2 = copy.deepcopy(m)
+#         # m2.set_item(0, 1, '19/31')
+#         # m2.set_item(1, 0, '31/19')
+#         # m.print_matrix(True)
+#         # m2.print_matrix(True)
+#         #
+#         # print "Distance from m: " + str(m.get_distance(m2)[0])
+#         # (noi, consistent) = m2.check_matrix_consistency()
+#         # print "Inconsistencies: " + str(noi)
+#         #
+#         # print ""
+#         # print "Inconsistent locations: " + str(m2.inconsistent_locations)
+#         # print "Most inconsistent tuples: " + str(m2.get_most_inconsistent_tuples())
+#         # print ""
+#         #
+#         # m2.set_item(0, 1, '80/40')
+#         # m2.set_item(1, 0, '40/80')
+#         # m.print_matrix(True)
+#         # m2.print_matrix(True)
+#         #
+#         # print "Distance from m: " + str(m.get_distance(m2)[0])
+#         # (noi, consistent) = m2.check_matrix_consistency()
+#         # print "Inconsistencies: " + str(noi)
+#         #
+#         # if noi > 0:
+#         #     print m2.inconsistent_locations
 
 if __name__ == "__main__":
     verboseCount = 0
 
-    m = PairwiseMatrix()
+    list = [1,1,3]
+    m = generate_consistent_matrix(list, 3)
 
-    m.add_matrix_row(['1', '2', '10', '100'])
-    m.add_matrix_row(['1/2', '1', '5', '50'])
-    m.add_matrix_row(['1/10', '1/5', '1', '10'])
-    m.add_matrix_row(['1/100', '1/50', '1/10', '1'])
+    # m = PairwiseMatrix()
+    # m.add_matrix_row(['1', '2', '10', '100'])
+    # m.add_matrix_row(['1/2', '1', '5', '50'])
+    # m.add_matrix_row(['1/10', '1/5', '1', '10'])
+    # m.add_matrix_row(['1/100', '1/50', '1/10', '1'])
 
-    solutions = solve_inconsistencies(m)
-    print solutions
+    # solutions = solve_inconsistencies(m)
+    # print solutions
 
     # it seems like the locations that have the real problem have more entries in the list of inconsistent locations,
     # where the only difference is [i,j]
