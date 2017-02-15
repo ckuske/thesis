@@ -427,32 +427,19 @@ def make_all_ones_matrix(matrix_size):
     return m
 
 
-def generate_consistent_matrix(matrix_size):
-    random.seed()
-    rounds_required = 0
-    while True:
-        rounds_required += 1
+def generate_random_matrix(matrix_size):
+    l = np.random.randint(2, pow(matrix_size, 3), size=(matrix_size, matrix_size))
+    m = PairwiseMatrix(make_all_ones_matrix(matrix_size))
 
-        l = np.random.randint(2, pow(matrix_size, 3), size=(matrix_size, matrix_size))
-        m = PairwiseMatrix(make_all_ones_matrix(matrix_size))
+    # matrix_elements = m.get_elements_below_diagonal()
+    for i in range(0, matrix_size):
+        for j in range(0, matrix_size):
+            if i == j:
+                continue
+            m.set_item(i, j, str(l[i][i]) + '/' + str(l[j][j]))
+            m.set_item(j, i, str(l[j][j]) + '/' + str(l[i][i]))
 
-        #   matrix_elements = m.get_elements_below_diagonal()
-        for i in range(0, matrix_size):
-            for j in range(0, matrix_size):
-                if i == j:
-                    continue
-                m.set_item(i, j, str(l[i][i]) + '/' + str(l[j][j]))
-                m.set_item(j, i, str(l[j][j]) + '/' + str(l[i][i]))
-        m.print_matrix()
-
-        (noi, consistent) = m.check_matrix_consistency()
-
-        if noi == 0:
-            print "Rounds required: " + str(rounds_required)
-            m.print_matrix()
-            m.reset_inconsistency_data()
-            # modify_elements(m, 2)
-            return
+    return m
 
 def generate_consistent_matrix(inputList, matrix_size):
     random.seed()
@@ -462,23 +449,18 @@ def generate_consistent_matrix(inputList, matrix_size):
 
         m = PairwiseMatrix(make_all_ones_matrix(matrix_size))
 
-        #   matrix_elements = m.get_elements_below_diagonal()
+        # matrix_elements = m.get_elements_below_diagonal()
         for i in range(0, matrix_size):
             for j in range(0, matrix_size):
                 if i == j:
                     continue
                 m.set_item(i, j, str(inputList[i]) + '/' + str(inputList[j]))
                 m.set_item(j, i, str(inputList[j]) + '/' + str(inputList[i]))
-        m.print_matrix()
 
         (noi, consistent) = m.check_matrix_consistency()
 
         if noi == 0:
-            print "Rounds required: " + str(rounds_required)
-            m.print_matrix()
-            m.reset_inconsistency_data()
-            # modify_elements(m, 2)
-            return
+            return m
 
 # 1. start with a random matrix (M) that has at least one inconsistency
 # 2. Generate another matrix (M') that is a copy of M.
@@ -574,9 +556,15 @@ def generate_consistent_matrix(inputList, matrix_size):
 if __name__ == "__main__":
     verboseCount = 0
 
-    list = [1,1,3]
-    m = generate_consistent_matrix(list, 3)
+    myList = [1,2,3]
+    m = generate_random_matrix(len(myList))
+    m.print_matrix(True)
 
+    mPrime = generate_consistent_matrix(myList, len(myList))
+    mPrime.print_matrix(True)
+    results =  mPrime.get_distance(m)
+    print "Distance from m: " + str(results[0])
+    print "Number of differences: " + str(results[1])
     # m = PairwiseMatrix()
     # m.add_matrix_row(['1', '2', '10', '100'])
     # m.add_matrix_row(['1/2', '1', '5', '50'])
