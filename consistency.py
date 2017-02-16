@@ -26,6 +26,7 @@
 import copy
 import fractions
 import random
+import math
 
 import numpy as np
 
@@ -265,6 +266,14 @@ class PairwiseMatrix:
                         bad_places.append([self.inconsistent_locations[i][0], self.inconsistent_locations[i][1]])
         return bad_places
 
+    def get_sum_above_diagonal(self):
+        abvDiag = self.get_elements_above_diagonal()
+        sum = 0
+        for i in range(0,len(abvDiag)):
+            (num,denom) = parse_fraction(self.matrix_data[abvDiag[i][0]][abvDiag[i][1]])
+            decValu = float(num) / float(denom)
+            sum += decValu
+        return sum
 
 ############## END OF CLASS ########################
 
@@ -462,6 +471,21 @@ def generate_consistent_matrix(inputList, matrix_size):
         if noi == 0:
             return m
 
+# http://stackoverflow.com/questions/2065553/get-all-numbers-that-add-up-to-a-number
+def sum_to_n(n, size, limit=None):
+    """Produce all lists of `size` positive integers in decreasing order
+    that add up to `n`."""
+    if size == 1:
+        yield [n]
+        return
+    if limit is None:
+        limit = n
+    start = (n + size - 1) // size
+    stop = min(limit, n - size + 1) + 1
+    for i in range(start, stop):
+        for tail in sum_to_n(n - i, size - 1, i):
+            yield [i] + tail
+
 # 1. start with a random matrix (M) that has at least one inconsistency
 # 2. Generate another matrix (M') that is a copy of M.
 # 3. attempt to solve the inconsistencies in M' by doing the following:
@@ -556,12 +580,21 @@ def generate_consistent_matrix(inputList, matrix_size):
 if __name__ == "__main__":
     verboseCount = 0
 
-    myList = [1,2,3]
+    myList = [1,2,3,4]
     m = generate_random_matrix(len(myList))
     m.print_matrix(True)
+    mSum = m.get_sum_above_diagonal()
+    print "mSum = " + str(mSum)
+
+    for foo in sum_to_n(int(math.floor(mSum)),3):
+        myList = foo
+        print "HUH: " + str(myList)
 
     mPrime = generate_consistent_matrix(myList, len(myList))
     mPrime.print_matrix(True)
+    mPrimeSum = mPrime.get_sum_above_diagonal()
+    print "mPrimeSum = " + str(mPrimeSum)
+
     results =  mPrime.get_distance(m)
     print "Distance from m: " + str(results[0])
     print "Number of differences: " + str(results[1])
