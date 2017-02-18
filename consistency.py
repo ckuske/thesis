@@ -36,247 +36,6 @@ matrixInputSquares = []
 root = 0
 
 
-class PairwiseMatrix:
-    def __init__(self, data=None):
-        if data is None:
-            data = []
-        self.matrix_data = []
-        self.matrix_size = 0
-
-        if len(data) > 0:
-            self.matrix_data = copy.deepcopy(data)
-            self.matrix_size = len(data)
-
-        self.inconsistent_locations = []
-        self.inconsistencies_detected = 0
-        self.greatest_distance_location = []
-        self.greatest_distance_value = 0
-
-    def reset_inconsistency_data(self):
-        self.inconsistent_locations = []
-        self.inconsistencies_detected = 0
-
-    def reset_inconsistency_locations(self):
-        self.greatest_distance_location = []
-        self.greatest_distance_value = 0
-
-    # def set_window_root(self, root_window):
-    #     self.root = root_window
-
-    def add_matrix_row(self, new_row):
-        self.matrix_data.append(new_row)
-        self.matrix_size += 1
-
-    def print_matrix(self, add_trailing_whitespace=False):
-        for i in range(0, self.matrix_size):
-            print self.matrix_data[i]
-        if add_trailing_whitespace:
-            print ""
-
-    def get_size(self):
-        return self.matrix_size
-
-    def get_row(self, i):
-        return self.matrix_data[i]
-
-    def print_inconsistencies(self):
-        print self.inconsistent_locations
-
-    def get_greatest_distance_value(self):
-        return self.greatest_distance_value
-
-    def get_greatest_distance_location(self):
-        return self.greatest_distance_location
-
-    def get_item(self, x, y):
-        if x > self.matrix_size - 1:
-            return ""
-        elif y > self.matrix_size - 1:
-            return ""
-        return self.matrix_data[x][y]
-
-    def set_item(self, x, y, val):
-        self.matrix_data[x][y] = val
-
-    def check_matrix_diagonal(self):
-        for i in range(0, self.matrix_size):
-            if int(self.get_item(i, i)) != 1:
-                return False
-        return True
-
-    def get_elements_above_diagonal(self):
-        out_list = []
-        for i in range(0, self.get_size()):
-            for j in range(0, self.get_size()):
-                if j > i:
-                    out_list.append([i, j])
-        return out_list
-
-    def get_elements_below_diagonal(self):
-        out_list = []
-        for i in range(0, self.get_size()):
-            for j in range(0, self.get_size()):
-                if i > j:
-                    out_list.append([i, j])
-        return out_list
-
-    def check_matrix_consistency(self):
-
-        self.inconsistent_locations = []
-        self.inconsistencies_detected = 0
-        n = self.matrix_size
-
-        for i in range(0, n):
-            for j in range(0, n):
-                for k in range(0, n):
-
-                    if i == j:
-                        continue
-
-                    # Dij = Dik * Dkj
-                    if verboseCount > 1:
-                        print "i={0}, j={1}, k={2} -> {3}[{4},{5}] * {6}[{7},{8}] should be {9}".format(
-                            str(i), str(j), str(k), str(self.get_item(i, k)), str(i), str(k),
-                            str(self.get_item(k, j)), str(k), str(j), str(self.get_item(i, j)))
-
-                    # get i,j
-                    # (ij_num, ij_denom) = (0, 0)
-                    # fraction_str = self.get_item(i, j)
-                    # if '/' not in fraction_str:
-                    #     (ij_num, ij_denom) = fraction_str, '1'
-                    # else:
-                    #     items = fraction_str.split('/')
-                    #     (ij_num, ij_denom) = items[0], items[1]
-                    #
-                    # # get i,k
-                    # (ik_num, ik_denom) = (0, 0)
-                    # fraction_str = self.get_item(i, k)
-                    # if '/' not in fraction_str:
-                    #     (ik_num, ik_denom) = fraction_str, '1'
-                    # else:
-                    #     items = fraction_str.split('/')
-                    #     (ik_num, ik_denom) = items[0], items[1]
-                    #
-                    # # get k,j
-                    # (kj_num, kj_denom) = (0, 0)
-                    # fraction_str = self.get_item(k, j)
-                    # if '/' not in fraction_str:
-                    #     (kj_num, kj_denom) = fraction_str, '1'
-                    # else:
-                    #     items = fraction_str.split('/')
-                    #     (kj_num, kj_denom) = items[0], items[1]
-
-                    (ij_num, ij_denom) = get_numerator_denominator(self.get_item(i, j))
-                    (ik_num, ik_denom) = get_numerator_denominator(self.get_item(i, k))
-                    (kj_num, kj_denom) = get_numerator_denominator(self.get_item(k, j))
-                    # print(ij_num, ij_denom)
-                    # print(ik_num, ik_denom)
-                    # print(kj_num, kj_denom)
-
-                    ij_top = (int(ik_num) * int(kj_num))
-                    ij_bottom = int(ik_denom) * int(kj_denom)
-
-                    (ij_top_simplified, ij_bottom_simplified) = simplify_fraction(ij_top, ij_bottom)
-
-                    if ij_top_simplified == 0:
-                        return (-1, -1)
-
-                    (ij_top_real, ij_bottom_real) = simplify_fraction(int(ij_num), int(ij_denom))
-
-                    if ij_bottom == 0:
-                        return (-1, -1)
-
-                    if (int(ij_top_simplified) != int(ij_top_real)) or \
-                            (int(ij_bottom_simplified) != int(ij_bottom_real)):
-                        if verboseCount >= 2:
-                            print "ijTopSimplified=" + str(ij_top_simplified)
-                            print "ij_bottom_simplified=" + str(ij_bottom_simplified)
-                            print "ij_top_real=" + str(ij_top_real)
-                            print "ij_bottom_real=" + str(ij_bottom_real)
-                            print ""
-                        self.inconsistent_locations.append([i, j, k])
-                        self.inconsistencies_detected += 1
-
-        return self.inconsistencies_detected, self.inconsistent_locations
-
-    def get_distance(self, o_matrix):  # , x_pos=-1, y_pos=-1):
-        total_distance = 0.0
-        differences_noted = 0
-        for i in range(0, self.matrix_size):
-            for j in range(0, self.matrix_size):
-
-                this_matrix_tuple = list(parse_fraction(self.get_item(i, j)))
-                this_matrix_tuple = list(simplify_fraction(int(this_matrix_tuple[0]), int(this_matrix_tuple[1])))
-                # this_matrix_is_ones = (this_matrix_tuple[0] == this_matrix_tuple[1])
-
-                other_matrix_tuple = list(parse_fraction(o_matrix.get_item(i, j)))
-                other_matrix_tuple = list(simplify_fraction(int(other_matrix_tuple[0]), int(other_matrix_tuple[1])))
-                # other_matrix_is_ones = (other_matrix_tuple[0] == other_matrix_tuple[1])
-
-                # if this_matrix_tuple[0] == this_matrix_tuple[1]
-
-                if this_matrix_tuple[1] != other_matrix_tuple[1]:  # find common denominator
-                    a = int(this_matrix_tuple[1])
-                    b = int(other_matrix_tuple[1])
-                    common_divisor = fractions.gcd(a, b)
-                    lcd = ((a * b) / common_divisor)
-
-                    if int(this_matrix_tuple[1]) != lcd:
-                        this_matrix_tuple[0] = str(int(this_matrix_tuple[0]) * lcd)
-                        this_matrix_tuple[1] = str(lcd)
-
-                    if int(other_matrix_tuple[1]) != lcd:
-                        other_matrix_tuple[0] = str(int(other_matrix_tuple[0]) * lcd)
-                        other_matrix_tuple[1] = str(lcd)
-
-                    difference = abs((float(this_matrix_tuple[0]) - float(other_matrix_tuple[0])) / lcd)
-                else:
-                    lcd = int(this_matrix_tuple[1])
-                    if int(this_matrix_tuple[1]) != lcd:
-                        this_matrix_tuple[0] = str(int(this_matrix_tuple[0]) * lcd)
-                        this_matrix_tuple[1] = str(lcd)
-                    if int(other_matrix_tuple[1]) != lcd:
-                        other_matrix_tuple[0] = str(int(other_matrix_tuple[0]) * lcd)
-                        other_matrix_tuple[1] = str(lcd)
-                    difference = abs((float(this_matrix_tuple[0]) - float(other_matrix_tuple[0])) / lcd)
-
-                if difference != 0:
-                    if abs(difference) > self.greatest_distance_value:
-                        self.greatest_distance_value = abs(difference)
-                        self.greatest_distance_location = [i, j]
-                    total_distance += abs(difference)
-                    differences_noted += 1
-
-                    # print "Difference [" + str(i) + "," + str(j) + "]= " + str(abs(difference))
-        return total_distance, differences_noted
-
-    def get_most_inconsistent_tuples(self):
-        abvDiag = self.get_elements_above_diagonal()
-        bad_places = []
-
-        if verboseCount > 0:
-            print self.inconsistent_locations
-
-        for i in range(0, len(self.inconsistent_locations)):
-            l = self.inconsistent_locations[i]
-            for j in range(i + 1, len(self.inconsistent_locations)):
-                if self.inconsistent_locations[i][0] == self.inconsistent_locations[j][0] and \
-                                self.inconsistent_locations[i][1] == self.inconsistent_locations[j][1]:  # compare i,j only (not k)
-                    if [self.inconsistent_locations[i][0], self.inconsistent_locations[i][1]] in abvDiag: #only add tuples that are above the diagonal
-                        bad_places.append([self.inconsistent_locations[i][0], self.inconsistent_locations[i][1]])
-        return bad_places
-
-    def get_sum_above_diagonal(self):
-        abvDiag = self.get_elements_above_diagonal()
-        sum = 0
-        for i in range(0,len(abvDiag)):
-            (num,denom) = parse_fraction(self.matrix_data[abvDiag[i][0]][abvDiag[i][1]])
-            decValu = float(num) / float(denom)
-            sum += decValu
-        return sum
-
-############## END OF CLASS ########################
-
 def are_two_tuples_reciprocals(i, j, k, l):
     if i == l and j == k:
         return True
@@ -486,126 +245,257 @@ def sum_to_n(n, size, limit=None):
         for tail in sum_to_n(n - i, size - 1, i):
             yield [i] + tail
 
-# 1. start with a random matrix (M) that has at least one inconsistency
-# 2. Generate another matrix (M') that is a copy of M.
-# 3. attempt to solve the inconsistencies in M' by doing the following:
-# 4. identify the tuples that involve the most [i,k] regardless of k and put in list badTuples
-# 5. pick a tuple from badTuples
-# 6. Using the tuple selected in Step 5, increment the fraction numerator by one
-# 7. Check consistency
-# 8. If consistent, compute distance between the new M' and M
-# 9. If first consistent matrix, store the new matrix
-#10. If not the first consistent matrix found, compare distance from M to this matrix
-#11. If distance of new consistent matrix is lower than the previous candidate, store the new matrix.
-#12.
-# def solve_inconsistencies(m):
-#     matrixSolutions = []
-#     m2 = copy.deepcopy(m)
-#     goingInDistance = m.get_distance(m2)
-#
-#     m2.set_item(0, 1, '19/31')  # pre-seed it with bad juju
-#     m2.set_item(1, 0, '31/19')
-#
-#     m2.set_item(1, 2, '19/31')  # pre-seed it with bad juju
-#     m2.set_item(2, 1, '31/19')
-#
-#     # m2.set_item(1, 2, '19/31')  # pre-seed it with bad juju
-#     # m2.set_item(2, 1, '31/19')
-#
-#     while True:
-#         (noi,foo) = m2.check_matrix_consistency()
-#         if noi == 0:
-#             print "Matrix is now consistent!"
-#             m2.print_matrix(True)
-#             matrixSolutions.append((copy.deepcopy(m2),m.get_distance(m2)[0]))
-#             return matrixSolutions
-#
-#         badTups = m2.get_most_inconsistent_tuples()
-#         print badTups
-#
-#         print ""
-#         print "Distance from m: " + str(m.get_distance(m2)[0])
-#         (noi, consistent) = m2.check_matrix_consistency()
-#         print "Inconsistencies: " + str(noi)
-#
-#         i = 0
-#         while len(badTups) > 0:
-#             fraction =  m2.matrix_data[int(badTups[i][0])][int(badTups[i][1])]
-#             [numerator, denominator] = get_numerator_denominator(fraction)
-#             #print [numerator, denominator]
-#             numerator = int(numerator) + 1
-#             m2.matrix_data[int(badTups[i][0])][int(badTups[i][1])] = str(numerator) + "/" + str(denominator)
-#             m2.matrix_data[int(badTups[i][1])][int(badTups[i][0])] = str(denominator) + "/" + str(numerator)
-#             #m2.print_matrix(True)
-#             m2.check_matrix_consistency()
-#             newBadTups = m2.get_most_inconsistent_tuples()
-#             if not badTups[i] in newBadTups:
-#                 print "Inconsistency at " + str(badTups[i]) + " solved, remaining tuples: " + str(newBadTups)
-#                 badTups = newBadTups
-#                 i = 0
-#                 break
-#
-#             # print m2.matrix_data[int(badTups[i][0])][int(badTups[i][1])]
-#             # m2.matrix_data[int(badTups[i][0])][int(badTups[i][1])] = '2'
-#             # m2.matrix_data[int(badTups[i][1])][int(badTups[i][0])] = '1/2'
-#
-#
-#         # m2 = copy.deepcopy(m)
-#         # m2.set_item(0, 1, '19/31')
-#         # m2.set_item(1, 0, '31/19')
-#         # m.print_matrix(True)
-#         # m2.print_matrix(True)
-#         #
-#         # print "Distance from m: " + str(m.get_distance(m2)[0])
-#         # (noi, consistent) = m2.check_matrix_consistency()
-#         # print "Inconsistencies: " + str(noi)
-#         #
-#         # print ""
-#         # print "Inconsistent locations: " + str(m2.inconsistent_locations)
-#         # print "Most inconsistent tuples: " + str(m2.get_most_inconsistent_tuples())
-#         # print ""
-#         #
-#         # m2.set_item(0, 1, '80/40')
-#         # m2.set_item(1, 0, '40/80')
-#         # m.print_matrix(True)
-#         # m2.print_matrix(True)
-#         #
-#         # print "Distance from m: " + str(m.get_distance(m2)[0])
-#         # (noi, consistent) = m2.check_matrix_consistency()
-#         # print "Inconsistencies: " + str(noi)
-#         #
-#         # if noi > 0:
-#         #     print m2.inconsistent_locations
+class PairwiseMatrix:
+    def __init__(self, data=None):
+        if data is None:
+            data = []
+        self.matrix_data = []
+        self.matrix_size = 0
+
+        if len(data) > 0:
+            self.matrix_data = copy.deepcopy(data)
+            self.matrix_size = len(data)
+
+        self.inconsistent_locations = []
+        self.inconsistencies_detected = 0
+        self.greatest_distance_location = []
+        self.greatest_distance_value = 0
+
+    def reset_inconsistency_data(self):
+        self.inconsistent_locations = []
+        self.inconsistencies_detected = 0
+
+    def reset_inconsistency_locations(self):
+        self.greatest_distance_location = []
+        self.greatest_distance_value = 0
+
+    # def set_window_root(self, root_window):
+    #     self.root = root_window
+
+    def add_matrix_row(self, new_row):
+        self.matrix_data.append(new_row)
+        self.matrix_size += 1
+
+    def print_matrix(self, add_trailing_whitespace=False):
+        for i in range(0, self.matrix_size):
+            print self.matrix_data[i]
+        if add_trailing_whitespace:
+            print ""
+
+    def get_size(self):
+        return self.matrix_size
+
+    def get_row(self, i):
+        return self.matrix_data[i]
+
+    def print_inconsistencies(self):
+        print self.inconsistent_locations
+
+    def get_greatest_distance_value(self):
+        return self.greatest_distance_value
+
+    def get_greatest_distance_location(self):
+        return self.greatest_distance_location
+
+    def get_item(self, x, y):
+        if x > self.matrix_size - 1:
+            return ""
+        elif y > self.matrix_size - 1:
+            return ""
+        return self.matrix_data[x][y]
+
+    def set_item(self, x, y, val):
+        self.matrix_data[x][y] = val
+
+    def check_matrix_diagonal(self):
+        for i in range(0, self.matrix_size):
+            if int(self.get_item(i, i)) != 1:
+                return False
+        return True
+
+    def get_elements_above_diagonal(self):
+        out_list = []
+        for i in range(0, self.get_size()):
+            for j in range(0, self.get_size()):
+                if j > i:
+                    out_list.append([i, j])
+        return out_list
+
+    def get_elements_below_diagonal(self):
+        out_list = []
+        for i in range(0, self.get_size()):
+            for j in range(0, self.get_size()):
+                if i > j:
+                    out_list.append([i, j])
+        return out_list
+
+    def check_matrix_consistency(self):
+
+        self.inconsistent_locations = []
+        self.inconsistencies_detected = 0
+        n = self.matrix_size
+
+        for i in range(0, n):
+            for j in range(0, n):
+                for k in range(0, n):
+
+                    if i == j:
+                        continue
+
+                    # Dij = Dik * Dkj
+                    if verboseCount > 1:
+                        print "i={0}, j={1}, k={2} -> {3}[{4},{5}] * {6}[{7},{8}] should be {9}".format(
+                            str(i), str(j), str(k), str(self.get_item(i, k)), str(i), str(k),
+                            str(self.get_item(k, j)), str(k), str(j), str(self.get_item(i, j)))
+
+                    # get i,j
+                    # (ij_num, ij_denom) = (0, 0)
+                    # fraction_str = self.get_item(i, j)
+                    # if '/' not in fraction_str:
+                    #     (ij_num, ij_denom) = fraction_str, '1'
+                    # else:
+                    #     items = fraction_str.split('/')
+                    #     (ij_num, ij_denom) = items[0], items[1]
+                    #
+                    # # get i,k
+                    # (ik_num, ik_denom) = (0, 0)
+                    # fraction_str = self.get_item(i, k)
+                    # if '/' not in fraction_str:
+                    #     (ik_num, ik_denom) = fraction_str, '1'
+                    # else:
+                    #     items = fraction_str.split('/')
+                    #     (ik_num, ik_denom) = items[0], items[1]
+                    #
+                    # # get k,j
+                    # (kj_num, kj_denom) = (0, 0)
+                    # fraction_str = self.get_item(k, j)
+                    # if '/' not in fraction_str:
+                    #     (kj_num, kj_denom) = fraction_str, '1'
+                    # else:
+                    #     items = fraction_str.split('/')
+                    #     (kj_num, kj_denom) = items[0], items[1]
+
+                    (ij_num, ij_denom) = get_numerator_denominator(self.get_item(i, j))
+                    (ik_num, ik_denom) = get_numerator_denominator(self.get_item(i, k))
+                    (kj_num, kj_denom) = get_numerator_denominator(self.get_item(k, j))
+                    # print(ij_num, ij_denom)
+                    # print(ik_num, ik_denom)
+                    # print(kj_num, kj_denom)
+
+                    ij_top = (int(ik_num) * int(kj_num))
+                    ij_bottom = int(ik_denom) * int(kj_denom)
+
+                    (ij_top_simplified, ij_bottom_simplified) = simplify_fraction(ij_top, ij_bottom)
+
+                    if ij_top_simplified == 0:
+                        return (-1, -1)
+
+                    (ij_top_real, ij_bottom_real) = simplify_fraction(int(ij_num), int(ij_denom))
+
+                    if ij_bottom == 0:
+                        return (-1, -1)
+
+                    if (int(ij_top_simplified) != int(ij_top_real)) or \
+                            (int(ij_bottom_simplified) != int(ij_bottom_real)):
+                        if verboseCount >= 2:
+                            print "ijTopSimplified=" + str(ij_top_simplified)
+                            print "ij_bottom_simplified=" + str(ij_bottom_simplified)
+                            print "ij_top_real=" + str(ij_top_real)
+                            print "ij_bottom_real=" + str(ij_bottom_real)
+                            print ""
+                        self.inconsistent_locations.append([i, j, k])
+                        self.inconsistencies_detected += 1
+
+        return self.inconsistencies_detected, self.inconsistent_locations
+
+    def get_distance(self, o_matrix):  # , x_pos=-1, y_pos=-1):
+        total_distance = 0.0
+        differences_noted = 0
+        for i in range(0, self.matrix_size):
+            for j in range(0, self.matrix_size):
+
+                if i > j: #only check items above the diagonal
+                    continue
+
+                this_matrix_tuple = parse_fraction(self.get_item(i, j))
+                other_matrix_tuple = parse_fraction(o_matrix.get_item(i, j))
+
+                a = float(float(this_matrix_tuple[0]) / float(this_matrix_tuple[1]))
+                b = float(float(other_matrix_tuple[0]) / float(other_matrix_tuple[1]))
+                difference = abs(a - b)
+
+                if difference != 0:
+                    print str(difference)
+                    if abs(difference) > self.greatest_distance_value:
+                        self.greatest_distance_value = abs(difference)
+                        self.greatest_distance_location = [i, j]
+                    total_distance += abs(difference)
+                    differences_noted += 1
+
+                    # print "Difference [" + str(i) + "," + str(j) + "]= " + str(abs(difference))
+        return total_distance, differences_noted
+
+    def get_most_inconsistent_tuples(self):
+        abvDiag = self.get_elements_above_diagonal()
+        bad_places = []
+
+        if verboseCount > 0:
+            print self.inconsistent_locations
+
+        for i in range(0, len(self.inconsistent_locations)):
+            l = self.inconsistent_locations[i]
+            for j in range(i + 1, len(self.inconsistent_locations)):
+                if self.inconsistent_locations[i][0] == self.inconsistent_locations[j][0] and \
+                                self.inconsistent_locations[i][1] == self.inconsistent_locations[j][1]:  # compare i,j only (not k)
+                    if [self.inconsistent_locations[i][0], self.inconsistent_locations[i][1]] in abvDiag: #only add tuples that are above the diagonal
+                        bad_places.append([self.inconsistent_locations[i][0], self.inconsistent_locations[i][1]])
+        return bad_places
+
+    def get_sum_above_diagonal(self):
+        abvDiag = self.get_elements_above_diagonal()
+        sum = 0
+        for i in range(0,len(abvDiag)):
+            (num,denom) = parse_fraction(self.matrix_data[abvDiag[i][0]][abvDiag[i][1]])
+            decValu = float(num) / float(denom)
+            sum += decValu
+        return sum
+
+############## END OF CLASS ########################
+
 
 if __name__ == "__main__":
     verboseCount = 0
 
-    myList = [1,2,3,4]
-    m = generate_random_matrix(len(myList))
+    myList = [1,1,1,1]
+    # m = generate_random_matrix(len(myList))
+
+    m = PairwiseMatrix()
+    m.add_matrix_row(['1', '7', '8/48', '8/46'])
+    m.add_matrix_row(['1/7', '1', '9/48', '9/46'])
+    m.add_matrix_row(['48/8', '48/9', '1', '48/46'])
+    m.add_matrix_row(['46/8', '46/9', '46/48', '1'])
+
+
     m.print_matrix(True)
+    print str(m.check_matrix_consistency())
     mSum = m.get_sum_above_diagonal()
     print "mSum = " + str(mSum)
 
-    for foo in sum_to_n(int(math.floor(mSum)),3):
-        myList = foo
-        print "HUH: " + str(myList)
+    myList = [1, 1, 1, 1]
+    for i in range(0,pow(2,8)):
+        mPrime = generate_consistent_matrix(myList, len(myList))
 
-    mPrime = generate_consistent_matrix(myList, len(myList))
-    mPrime.print_matrix(True)
-    mPrimeSum = mPrime.get_sum_above_diagonal()
-    print "mPrimeSum = " + str(mPrimeSum)
+        mPrime.print_matrix(True)
+        mPrimeSum = mPrime.get_sum_above_diagonal()
+        print "mPrimeSum = " + str(mPrimeSum)
 
-    results =  mPrime.get_distance(m)
-    print "Distance from m: " + str(results[0])
-    print "Number of differences: " + str(results[1])
-    # m = PairwiseMatrix()
-    # m.add_matrix_row(['1', '2', '10', '100'])
-    # m.add_matrix_row(['1/2', '1', '5', '50'])
-    # m.add_matrix_row(['1/10', '1/5', '1', '10'])
-    # m.add_matrix_row(['1/100', '1/50', '1/10', '1'])
+        results =  mPrime.get_distance(m)
+        print "Distance from m: " + str(results[0])
+        print "Number of differences: " + str(results[1])
 
-    # solutions = solve_inconsistencies(m)
-    # print solutions
 
-    # it seems like the locations that have the real problem have more entries in the list of inconsistent locations,
-    # where the only difference is [i,j]
+    # mPrime = PairwiseMatrix()
+    # mPrime.add_matrix_row(['1', '1/2', '1/3', '1/4'])
+    # mPrime.add_matrix_row(['2/1', '1', '2/3', '2/4'])
+    # mPrime.add_matrix_row(['3/1', '3/2', '1', '3/4'])
+    # mPrime.add_matrix_row(['4/1', '4/2', '4/3', '1'])
