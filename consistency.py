@@ -425,7 +425,7 @@ class PairwiseMatrix:
                 difference = abs(a - b)
 
                 if difference != 0:
-                    print str(difference)
+                    # print str(difference)
                     if abs(difference) > self.greatest_distance_value:
                         self.greatest_distance_value = abs(difference)
                         self.greatest_distance_location = [i, j]
@@ -477,23 +477,69 @@ if __name__ == "__main__":
 
 
     m.print_matrix(True)
-    print str(m.check_matrix_consistency())
+    #print str(m.check_matrix_consistency())
     mSum = m.get_sum_above_diagonal()
     print "mSum = " + str(mSum)
 
+    resultLists = []
     myList = [1, 1, 1, 1]
-    for i in range(0,pow(2,8)):
-        mPrime = generate_consistent_matrix(myList, len(myList))
+    for i in range(0, 20):
 
-        mPrime.print_matrix(True)
-        mPrimeSum = mPrime.get_sum_above_diagonal()
-        print "mPrimeSum = " + str(mPrimeSum)
+        distanceDelta = -1
+        bestPosition = -1
+        for listIdx in range(0, len(myList)):
 
-        results =  mPrime.get_distance(m)
-        print "Distance from m: " + str(results[0])
-        print "Number of differences: " + str(results[1])
+            myList[listIdx] = myList[listIdx] + 1
 
+            print "Before"
+            print myList
 
+            mPrime = generate_consistent_matrix(myList, len(myList))
+            #mPrime.print_matrix(True)
+            mPrimeSum = mPrime.get_sum_above_diagonal()
+            #print "mPrimeSum = " + str(mPrimeSum)
+
+            results =  mPrime.get_distance(m)
+            #print "Distance from m: " + str(results[0])
+            #print "Number of differences: " + str(results[1])
+
+            if distanceDelta < 0: #first time in loop(s)
+                distanceDelta = results[0]
+                bestPosition = listIdx
+            elif results[0] < distanceDelta: #this iteration is better than the last run(s)
+                distanceDelta = results[0]
+                bestPosition = listIdx
+            elif myList[listIdx] > 1: # don't go below 0!
+                myList[listIdx] = myList[listIdx] - 1
+
+            print "After"
+            print myList
+            print ""
+
+        # # #reset the other positions
+        # for listIdx in range(0, len(myList)):
+        #     if listIdx != bestPosition and myList[listIdx] > 1:
+        #         myList[listIdx] = myList[listIdx] - 1
+
+        # save the best in this iteration
+        if len(resultLists) > 0:
+            (l,d) =  resultLists[0]
+            if distanceDelta < d:
+                resultLists = []
+                resultLists.append((copy.deepcopy(myList), distanceDelta))
+        else:
+            resultLists.append((copy.deepcopy(myList), distanceDelta))
+
+        #resultLists.append((copy.deepcopy(myList), distanceDelta))
+
+    print "DONE"
+    print str(resultLists)
+
+    (l, d) = resultLists[0]
+    resultMatrix = generate_consistent_matrix(l, len(l))
+    results = resultMatrix.get_distance(m)
+    print "Distance from m: " + str(results[0])
+    print "Number of differences: " + str(results[1])
     # mPrime = PairwiseMatrix()
     # mPrime.add_matrix_row(['1', '1/2', '1/3', '1/4'])
     # mPrime.add_matrix_row(['2/1', '1', '2/3', '2/4'])
