@@ -26,7 +26,6 @@
 import copy
 import fractions
 import random
-import math
 
 import numpy as np
 
@@ -210,7 +209,6 @@ def generate_random_matrix(matrix_size):
     return m
 
 def generate_consistent_matrix(inputList, matrix_size):
-    random.seed()
     rounds_required = 0
     while True:
         rounds_required += 1
@@ -224,11 +222,11 @@ def generate_consistent_matrix(inputList, matrix_size):
                     continue
                 m.set_item(i, j, str(inputList[i]) + '/' + str(inputList[j]))
                 m.set_item(j, i, str(inputList[j]) + '/' + str(inputList[i]))
-
-        (noi, consistent) = m.check_matrix_consistency()
-
-        if noi == 0:
-            return m
+        return m
+        # (noi, consistent) = m.check_matrix_consistency()
+        #
+        # if noi == 0:
+        #     return m
 
 # http://stackoverflow.com/questions/2065553/get-all-numbers-that-add-up-to-a-number
 def sum_to_n(n, size, limit=None):
@@ -465,83 +463,58 @@ class PairwiseMatrix:
 
 if __name__ == "__main__":
     verboseCount = 0
+    for gCount in range(0, 1):
+        myList = [1, 1, 1, 1]
+        m = generate_random_matrix(len(myList))
 
-    myList = [1,1,1,1]
-    # m = generate_random_matrix(len(myList))
+        print "Random Matrix: "
+        m.print_matrix()
+        mSum = m.get_sum_above_diagonal()
+        print "Random Matrix Sum: " + str(mSum)
+        print ""
 
-    m = PairwiseMatrix()
-    m.add_matrix_row(['1', '7', '8/48', '8/46'])
-    m.add_matrix_row(['1/7', '1', '9/48', '9/46'])
-    m.add_matrix_row(['48/8', '48/9', '1', '48/46'])
-    m.add_matrix_row(['46/8', '46/9', '46/48', '1'])
+        resultLists = []
+        myList = [1, 1, 1, 1]
+        for i in range(1, 1000):
 
+            distanceDelta = -1
+            bestPosition = -1
+            slotsToRevert = []
+            for listIdx in range(0, len(myList)):
 
-    m.print_matrix(True)
-    #print str(m.check_matrix_consistency())
-    mSum = m.get_sum_above_diagonal()
-    print "mSum = " + str(mSum)
+                myList[listIdx] = myList[listIdx] + i
+                mPrime = generate_consistent_matrix(myList, len(myList))
+                mPrimeSum = mPrime.get_sum_above_diagonal()
 
-    resultLists = []
-    myList = [1, 1, 1, 1]
-    for i in range(0, 20):
+                results = mPrime.get_distance(m)
 
-        distanceDelta = -1
-        bestPosition = -1
-        for listIdx in range(0, len(myList)):
+                if distanceDelta < 0:  # first time in loop(s)
+                    distanceDelta = results[0]
+                    bestPosition = listIdx
 
-            myList[listIdx] = myList[listIdx] + 1
+                elif results[0] < distanceDelta:  # this iteration is better than the last run(s)
+                    distanceDelta = results[0]
+                    bestPosition = listIdx
+                elif myList[listIdx] > 1:  # don't go below 0!
+                    myList[listIdx] = myList[listIdx] - i
 
-            print "Before"
-            print myList
-
-            mPrime = generate_consistent_matrix(myList, len(myList))
-            #mPrime.print_matrix(True)
-            mPrimeSum = mPrime.get_sum_above_diagonal()
-            #print "mPrimeSum = " + str(mPrimeSum)
-
-            results =  mPrime.get_distance(m)
-            #print "Distance from m: " + str(results[0])
-            #print "Number of differences: " + str(results[1])
-
-            if distanceDelta < 0: #first time in loop(s)
-                distanceDelta = results[0]
-                bestPosition = listIdx
-            elif results[0] < distanceDelta: #this iteration is better than the last run(s)
-                distanceDelta = results[0]
-                bestPosition = listIdx
-            elif myList[listIdx] > 1: # don't go below 0!
-                myList[listIdx] = myList[listIdx] - 1
-
-            print "After"
-            print myList
-            print ""
-
-        # # #reset the other positions
-        # for listIdx in range(0, len(myList)):
-        #     if listIdx != bestPosition and myList[listIdx] > 1:
-        #         myList[listIdx] = myList[listIdx] - 1
-
-        # save the best in this iteration
-        if len(resultLists) > 0:
-            (l,d) =  resultLists[0]
-            if distanceDelta < d:
-                resultLists = []
+            # save the best in this iteration
+            if len(resultLists) > 0:
+                (l, d) = resultLists[0]
+                if distanceDelta < d:
+                    resultLists = []
+                    resultLists.append((copy.deepcopy(myList), distanceDelta))
+            else:
                 resultLists.append((copy.deepcopy(myList), distanceDelta))
-        else:
-            resultLists.append((copy.deepcopy(myList), distanceDelta))
 
-        #resultLists.append((copy.deepcopy(myList), distanceDelta))
-
-    print "DONE"
-    print str(resultLists)
-
-    (l, d) = resultLists[0]
-    resultMatrix = generate_consistent_matrix(l, len(l))
-    results = resultMatrix.get_distance(m)
-    print "Distance from m: " + str(results[0])
-    print "Number of differences: " + str(results[1])
-    # mPrime = PairwiseMatrix()
-    # mPrime.add_matrix_row(['1', '1/2', '1/3', '1/4'])
-    # mPrime.add_matrix_row(['2/1', '1', '2/3', '2/4'])
-    # mPrime.add_matrix_row(['3/1', '3/2', '1', '3/4'])
-    # mPrime.add_matrix_row(['4/1', '4/2', '4/3', '1'])
+        if len(resultLists) > 0:
+            (l, d) = resultLists[0]
+            print "Solution Set: " + str(l)
+            resultMatrix = generate_consistent_matrix(l, len(l))
+            print "Solution Matrix: "
+            resultMatrix.print_matrix(True)
+            results = resultMatrix.get_distance(m)
+            print "Distance from m: " + str(results[0])
+            print "Sum: " + str(resultMatrix.get_sum_above_diagonal())
+            print "Number of differences: " + str(results[1])
+            print "------------------------------------------"
