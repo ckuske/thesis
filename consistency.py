@@ -463,13 +463,13 @@ class PairwiseMatrix:
 
 if __name__ == "__main__":
     verboseCount = 0
-    for gCount in range(0, 1):
+    for gCount in range(0, 5):
         myList = [1, 1, 1, 1]
-        m = generate_random_matrix(len(myList))
 
+        m = generate_random_matrix(len(myList))
+        mSum = m.get_sum_above_diagonal()
         print "Random Matrix: "
         m.print_matrix()
-        mSum = m.get_sum_above_diagonal()
         print "Random Matrix Sum: " + str(mSum)
         print ""
 
@@ -509,12 +509,14 @@ if __name__ == "__main__":
 
         if len(resultLists) > 0:
             (l, d) = resultLists[0]
-            print "Solution Set: " + str(l)
             resultMatrix = generate_consistent_matrix(l, len(l))
+            results = resultMatrix.get_distance(m)
+
+            print "Solution Set: " + str(l)
             print "Solution Matrix: "
             resultMatrix.print_matrix(True)
-            results = resultMatrix.get_distance(m)
+
             print "Distance from m: " + str(results[0])
             print "Sum: " + str(resultMatrix.get_sum_above_diagonal())
-            print "Number of differences: " + str(results[1])
+            # print "Number of differences: " + str(results[1])
             print "------------------------------------------"
