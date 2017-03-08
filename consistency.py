@@ -25,7 +25,9 @@
 
 import copy
 import fractions
+import json
 import random
+from itertools import permutations
 
 import numpy as np
 
@@ -460,9 +462,93 @@ class PairwiseMatrix:
 
 ############## END OF CLASS ########################
 
+def doStuff():
+    myList = [1, 1, 1, 1]
+    for i in range(1, 1000):
+        for listIdx in range(0, len(myList)):
+            myList[listIdx] = myList[listIdx] + 1
+            print myList
+
+
+def combinations(items):
+    return (set(compress(items, mask)) for mask in product(*[[0, 1]] * len(items)))
+
+
+def fileIO():
+    fo = open("foo.txt", "r", 65536)
+
+    myList = [1, 1, 1, 1]
+
+    m = generate_random_matrix(len(myList))
+    mSum = m.get_sum_above_diagonal()
+    print "Random Matrix: "
+    m.print_matrix()
+    print "Random Matrix Sum: " + str(mSum)
+    print ""
+
+    resultLists = []
+    for line in fo:
+        myList = line.strip().split(',')
+
+        distanceDelta = -1
+        bestPosition = -1
+        slotsToRevert = []
+        for listIdx in range(0, len(myList)):
+
+            myList[listIdx] = myList[listIdx] + 1
+            mPrime = generate_consistent_matrix(myList, len(myList))
+            mPrimeSum = mPrime.get_sum_above_diagonal()
+
+            results = mPrime.get_distance(m)
+
+            if distanceDelta < 0:  # first time in loop(s)
+                distanceDelta = results[0]
+                bestPosition = listIdx
+
+            elif results[0] < distanceDelta:  # this iteration is better than the last run(s)
+                distanceDelta = results[0]
+                bestPosition = listIdx
+            elif myList[listIdx] > 1:  # don't go below 0!
+                myList[listIdx] = myList[listIdx] - 1
+
+        # save the best in this iteration
+        if len(resultLists) > 0:
+            (l, d) = resultLists[0]
+            if distanceDelta < d:
+                resultLists = []
+                resultLists.append((copy.deepcopy(myList), distanceDelta))
+        else:
+            resultLists.append((copy.deepcopy(myList), distanceDelta))
+
+    if len(resultLists) > 0:
+        (l, d) = resultLists[0]
+        resultMatrix = generate_consistent_matrix(l, len(l))
+        results = resultMatrix.get_distance(m)
+
+        print "Solution Set: " + str(l)
+        print "Solution Matrix: "
+        resultMatrix.print_matrix(True)
+
+        print "Distance from m: " + str(results[0])
+        print "Sum: " + str(resultMatrix.get_sum_above_diagonal())
+        # print "Number of differences: " + str(results[1])
+        print "------------------------------------------"
+
 
 if __name__ == "__main__":
     verboseCount = 0
+    # doStuff()
+    # exit()
+    fo = open("foo.txt", "w", 64 * 1024)
+    stuff = range(1, 100)
+
+    for subset in permutations(stuff, 4):
+        json.dump(list(subset), fo)
+
+    fo.close()
+    # fileIO()
+
+    exit()
     for gCount in range(0, 5):
         myList = [1, 1, 1, 1]
 
@@ -475,14 +561,14 @@ if __name__ == "__main__":
 
         resultLists = []
         myList = [1, 1, 1, 1]
-        for i in range(1, 1000):
+        for i in range(1, 100000):
 
             distanceDelta = -1
             bestPosition = -1
             slotsToRevert = []
             for listIdx in range(0, len(myList)):
 
-                myList[listIdx] = myList[listIdx] + i
+                myList[listIdx] = myList[listIdx] + 1
                 mPrime = generate_consistent_matrix(myList, len(myList))
                 mPrimeSum = mPrime.get_sum_above_diagonal()
 
@@ -496,7 +582,7 @@ if __name__ == "__main__":
                     distanceDelta = results[0]
                     bestPosition = listIdx
                 elif myList[listIdx] > 1:  # don't go below 0!
-                    myList[listIdx] = myList[listIdx] - i
+                    myList[listIdx] = myList[listIdx] - 1
 
             # save the best in this iteration
             if len(resultLists) > 0:
