@@ -25,9 +25,7 @@
 
 import copy
 import fractions
-import json
 import random
-from itertools import permutations
 
 import numpy as np
 
@@ -285,8 +283,14 @@ class PairwiseMatrix:
     def get_size(self):
         return self.matrix_size
 
-    def get_row(self, i):
-        return self.matrix_data[i]
+    def get_row(self, rowIdx):
+        return self.matrix_data[rowIdx]
+
+    def get_column(self, colIdx):
+        colData = []
+        for rowIdx in range(0, len(self.matrix_data)):
+            colData.append(self.matrix_data[rowIdx][colIdx])
+        return colData
 
     def print_inconsistencies(self):
         print self.inconsistent_locations
@@ -535,20 +539,8 @@ def fileIO():
         print "------------------------------------------"
 
 
-if __name__ == "__main__":
-    verboseCount = 0
-    # doStuff()
-    # exit()
-    fo = open("foo.txt", "w", 64 * 1024)
-    stuff = range(1, 100)
-
-    for subset in permutations(stuff, 4):
-        json.dump(list(subset), fo)
-
-    fo.close()
-    # fileIO()
-
-    exit()
+# basically a brute force search method
+def Search1():
     for gCount in range(0, 5):
         myList = [1, 1, 1, 1]
 
@@ -561,7 +553,7 @@ if __name__ == "__main__":
 
         resultLists = []
         myList = [1, 1, 1, 1]
-        for i in range(1, 100000):
+        for i in range(1, 1000):
 
             distanceDelta = -1
             bestPosition = -1
@@ -606,3 +598,26 @@ if __name__ == "__main__":
             print "Sum: " + str(resultMatrix.get_sum_above_diagonal())
             # print "Number of differences: " + str(results[1])
             print "------------------------------------------"
+
+
+def Search2():
+    myList = [1, 1, 1, 1]
+
+    m = generate_random_matrix(len(myList))
+    mSum = m.get_sum_above_diagonal()
+    print "Random Matrix: "
+    m.print_matrix()
+    print "Random Matrix Sum: " + str(mSum)
+    print ""
+
+    for columnIdx in range(0, len(myList)):
+        columnData = m.get_column(columnIdx)
+        mPrime = generate_consistent_matrix(columnData, len(columnData))
+        mPrime.print_matrix(True)
+        # for rowIdx in range(0, len(myList)):
+        #     print m.get_row(rowIdx)
+
+
+if __name__ == "__main__":
+    verboseCount = 0
+    Search2()
