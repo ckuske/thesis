@@ -23,6 +23,7 @@
 # diagrams - show when an inconsistency introduced, which items are
 # affected (xfig, omnigraffle) 'include graphics' command in LaTeX
 
+import sys
 import copy
 import fractions
 import random
@@ -220,13 +221,30 @@ def generate_consistent_matrix(inputList, matrix_size):
             for j in range(0, matrix_size):
                 if i == j:
                     continue
-                m.set_item(i, j, str(inputList[i]) + '/' + str(inputList[j]))
-                m.set_item(j, i, str(inputList[j]) + '/' + str(inputList[i]))
+                if not '/' in inputList[i] and not '/' in inputList[j]:
+                    m.set_item(i, j, str(inputList[i]) + '/' + str(inputList[j]))
+                    m.set_item(j, i, str(inputList[j]) + '/' + str(inputList[i]))
+                else:
+                    t1 = inputList[i].split('/')
+                    if len(t1) == 1:
+                        t1.append('1')
+                    t2 = inputList[j].split('/')
+                    if len(t2) == 1:
+                        t2.append('1')
+                    t2.reverse()
+                    answer1 = str(int(t1[0]) * int(t2[0]))
+                    answer2 = str(int(t1[1]) * int(t2[1]))
+                    if answer2 == '1':
+                        m.set_item(i, j, answer1)
+                    else:
+                        m.set_item(i, j, answer1 + '/' + answer2)
+
+                    if answer1 == '1':
+                        m.set_item(j, i, answer2)
+                    else:
+                        m.set_item(j, i, answer2 + '/' + answer1)
+
         return m
-        # (noi, consistent) = m.check_matrix_consistency()
-        #
-        # if noi == 0:
-        #     return m
 
 # http://stackoverflow.com/questions/2065553/get-all-numbers-that-add-up-to-a-number
 def sum_to_n(n, size, limit=None):
@@ -466,79 +484,6 @@ class PairwiseMatrix:
 
 ############## END OF CLASS ########################
 
-def doStuff():
-    myList = [1, 1, 1, 1]
-    for i in range(1, 1000):
-        for listIdx in range(0, len(myList)):
-            myList[listIdx] = myList[listIdx] + 1
-            print myList
-
-
-def combinations(items):
-    return (set(compress(items, mask)) for mask in product(*[[0, 1]] * len(items)))
-
-
-def fileIO():
-    fo = open("foo.txt", "r", 65536)
-
-    myList = [1, 1, 1, 1]
-
-    m = generate_random_matrix(len(myList))
-    mSum = m.get_sum_above_diagonal()
-    print "Random Matrix: "
-    m.print_matrix()
-    print "Random Matrix Sum: " + str(mSum)
-    print ""
-
-    resultLists = []
-    for line in fo:
-        myList = line.strip().split(',')
-
-        distanceDelta = -1
-        bestPosition = -1
-        slotsToRevert = []
-        for listIdx in range(0, len(myList)):
-
-            myList[listIdx] = myList[listIdx] + 1
-            mPrime = generate_consistent_matrix(myList, len(myList))
-            mPrimeSum = mPrime.get_sum_above_diagonal()
-
-            results = mPrime.get_distance(m)
-
-            if distanceDelta < 0:  # first time in loop(s)
-                distanceDelta = results[0]
-                bestPosition = listIdx
-
-            elif results[0] < distanceDelta:  # this iteration is better than the last run(s)
-                distanceDelta = results[0]
-                bestPosition = listIdx
-            elif myList[listIdx] > 1:  # don't go below 0!
-                myList[listIdx] = myList[listIdx] - 1
-
-        # save the best in this iteration
-        if len(resultLists) > 0:
-            (l, d) = resultLists[0]
-            if distanceDelta < d:
-                resultLists = []
-                resultLists.append((copy.deepcopy(myList), distanceDelta))
-        else:
-            resultLists.append((copy.deepcopy(myList), distanceDelta))
-
-    if len(resultLists) > 0:
-        (l, d) = resultLists[0]
-        resultMatrix = generate_consistent_matrix(l, len(l))
-        results = resultMatrix.get_distance(m)
-
-        print "Solution Set: " + str(l)
-        print "Solution Matrix: "
-        resultMatrix.print_matrix(True)
-
-        print "Distance from m: " + str(results[0])
-        print "Sum: " + str(resultMatrix.get_sum_above_diagonal())
-        # print "Number of differences: " + str(results[1])
-        print "------------------------------------------"
-
-
 # basically a brute force search method
 def Search1():
     for gCount in range(0, 5):
@@ -601,22 +546,54 @@ def Search1():
 
 
 def Search2():
-    myList = [1, 1, 1, 1]
+    myList = [2,3,4]
 
-    m = generate_random_matrix(len(myList))
+    #/m = generate_random_matrix(len(myList))
+    m = PairwiseMatrix()
+    m.add_matrix_row(['1', '2', '3'])
+    m.add_matrix_row(['1/2', '1', '4'])
+    m.add_matrix_row(['1/3', '1/4', '1'])
     mSum = m.get_sum_above_diagonal()
-    print "Random Matrix: "
+    print "Matrix: "
     m.print_matrix()
-    print "Random Matrix Sum: " + str(mSum)
+    print "Matrix Sum: " + str(mSum)
     print ""
+
+    bestSolutionDistance = sys.maxint
+    bestSolutionSet = []
 
     for columnIdx in range(0, len(myList)):
         columnData = m.get_column(columnIdx)
         mPrime = generate_consistent_matrix(columnData, len(columnData))
-        mPrime.print_matrix(True)
-        # for rowIdx in range(0, len(myList)):
-        #     print m.get_row(rowIdx)
+        results = mPrime.get_distance(m)
+        calculatedDistance = results[0]
+        if calculatedDistance < bestSolutionDistance:
+            bestSolutionDistance = calculatedDistance
+            bestSolutionSet = copy.copy(columnData)
+        print "Distance from m: " + str(calculatedDistance)
+        print "Sum: " + str(mPrime.get_sum_above_diagonal())
 
+    for rowIdx in range(0, len(myList)):
+        rowData = m.get_row(rowIdx)
+        mPrime = generate_consistent_matrix(rowData, len(rowData))
+        results = mPrime.get_distance(m)
+        calculatedDistance = results[0]
+        if calculatedDistance < bestSolutionDistance:
+            bestSolutionDistance = calculatedDistance
+            bestSolutionSet = copy.copy(columnData)
+        print "Distance from m: " + str(calculatedDistance)
+        print "Sum: " + str(mPrime.get_sum_above_diagonal())
+
+    print ""
+    print "-= Best Solution =-"
+    print "Solution Set: " + str(bestSolutionSet)
+    print "Derived Matrix"
+    solutionMatrix = generate_consistent_matrix(bestSolutionSet, len(bestSolutionSet))
+    solutionMatrix.print_matrix(True)
+    solutionResults = solutionMatrix.get_distance(m)
+    solutionDistance = solutionResults[0]
+    print "Distance from m: " + str(solutionDistance)
+    print "Sum: " + str(solutionMatrix.get_sum_above_diagonal())
 
 if __name__ == "__main__":
     verboseCount = 0
