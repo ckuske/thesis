@@ -221,7 +221,7 @@ def generate_consistent_matrix(inputList, matrix_size):
             for j in range(0, matrix_size):
                 if i == j:
                     continue
-                if not '/' in inputList[i] and not '/' in inputList[j]:
+                if (not '/' in inputList[i]) and (not '/' in inputList[j]):
                     m.set_item(i, j, str(inputList[i]) + '/' + str(inputList[j]))
                     m.set_item(j, i, str(inputList[j]) + '/' + str(inputList[i]))
                 else:
@@ -570,8 +570,12 @@ def Search2():
         if calculatedDistance < bestSolutionDistance:
             bestSolutionDistance = calculatedDistance
             bestSolutionSet = copy.copy(columnData)
+
+        print "Potential Solution Set: " + str(columnData)
+        mPrime.print_matrix(True)
         print "Distance from m: " + str(calculatedDistance)
         print "Sum: " + str(mPrime.get_sum_above_diagonal())
+        print ""
 
     for rowIdx in range(0, len(myList)):
         rowData = m.get_row(rowIdx)
@@ -581,6 +585,8 @@ def Search2():
         if calculatedDistance < bestSolutionDistance:
             bestSolutionDistance = calculatedDistance
             bestSolutionSet = copy.copy(columnData)
+        print "Potential Solution Set: " + str(rowData)
+        mPrime.print_matrix(True)
         print "Distance from m: " + str(calculatedDistance)
         print "Sum: " + str(mPrime.get_sum_above_diagonal())
 
