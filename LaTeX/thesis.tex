@@ -39,7 +39,7 @@
 
 
 
-\usepackage{amssymb,mathtools,latexsym,amsmath,amsthm,amsfonts,graphics}
+\usepackage{amssymb,mathtools,latexsym,amsmath,amsthm,amsfonts,graphics,kbordermatrix}
 \newcommand\Month{%
 \ifcase\number\month\relax%
 \or January\or February\or March\or April\or May\or June%
@@ -60,6 +60,12 @@
 \setlength{\evensidemargin}{0.7in} \setlength{\textheight}{7.9in}
 \setlength{\textwidth}{5.3in} \setlength{\footskip}{0.75in}
 \linespread{2.0}
+
+\makeatletter
+\def\subsubsection{\@startsection{subsubsection}{3}%
+  \z@{.5\linespacing\@plus.7\linespacing}{.1\linespacing}%
+  {\normalfont\itshape}}
+\makeatother
 
 \begin{document}
  \newpage
@@ -147,7 +153,7 @@ ALL RIGHTS RESERVED
 \begin{center}
 \vspace*{60mm}
 
-To my family, in gratitude for their encouragement and support.
+To my wife Kendra and my children Evan and Emma, in gratitude for their encouragement and support. Without them, I would have not been able to reach this goal I had set for myself.
 
 \end{center}
 
@@ -161,8 +167,7 @@ To my family, in gratitude for their encouragement and support.
 {\bf Acknowledgements}
 \end{center}
 
-This dissertation could not have been written without the constant advice and encouragement of my advisor, Professor Michael Soltys.
-Many thanks must also go to the members of my committee, name and name. 
+This dissertation could not have been written without the constant advice and encouragement of my advisor, Professor Michael Soltys.  Other thanks to go here at a later time.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % abstract
 
@@ -182,10 +187,12 @@ by
 
 This thesis will give an overview of pairwise matrices and their properties. After this introduction, a summary of existing literature on Pairwise Matrices will follow.  
 
-A method of generating a consistent Pairwise Matrix from an inconsistent matrix will be presented, along with a method to find a consistent matrix that is as close to the original inconsistent matrix as possible using a calculated distance.  After this methodology has been described, an analysis of the results and further work to be done will follow.
+A method of generating a consistent Pairwise Matrix from an inconsistent matrix will be presented, along with a method to find a consistent matrix that is as close to the original inconsistent matrix as possible using a calculated distance.
+
+After this methodology has been described, an analysis of the results and further work to be done will follow.
 \end{quote} 
 
-%%%%%%%%%%%%%% Contents Page: LaTeX will figure this out for you as long as you use Section and Subsection commands.%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Contents Page: LaTeX will figure this out for you as long as you use Section and Subsection commands.%%%
 \newpage
 \tableofcontents
 \newpage
@@ -196,21 +203,72 @@ A method of generating a consistent Pairwise Matrix from an inconsistent matrix 
 
 \pagenumbering{arabic}
 
-%%%%%%%%%%%%%%% OK, this is where your content goes!%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%% OK, this is where your content goes! %%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
-Stuff
+Over the past few decades, pairwise comparisons and the Analytical Hierarchical Process (\textit{AHP}) have given decision makers a new set of tools that empower them to make more informed decisions.  AHP uses matrices to help rank the evaluation criteria based on importance.  This type of problem is also knows as Multiple Attribute Decision Making \textit{(MADM)}.
 
-\subsection{Notation and Terminology}
-{\bf Consistency:}
+In pairwise matrices, each criterion has a relative rank.  Consider the following pairwise matrix $A$:
+\begin{center}
+$
+\begin{bmatrix}
+    1    & 2   & 10 \\
+    1/2  & 1   & 5 \\
+    1/10 & 1/5 & 1 
+\end{bmatrix}
+$
 
-{\bf Matrix:}
 
-{\bf Pairwise Matrix:} A Pairwise Matrix is defined as a square matrix
+\[
+\kbordermatrix{
+    & c_1 & c_2 & c_3 \\
+    r_1 & 1 & 1 & 1 \\
+    r_2 & 0 & 1 & 0  \\
+    r_3 & 0 & 0 & 1 
+  }
+\]
 
-{\bf Reciprocal:}
+\end{center}
+
+Remembering that the criterion are the elements above the diagonal, the first line indicates that criterion $A_{13}$ is preferred ten times over element $A_{12}$, and element $A_{23}$ is preferred five times over criterion $A_{13}$.
+
+When decision makers are trying to make their evaluation(s), they will often bring in subject matter experts \textit{(SMEs)} to help develop the relative rankings of how one preference should be ranked compared to another.  When these experts define their preferences in a pairwise matrix, they often generate matrices that do not meet the criteria for consistency.
+
+Consistency in pairwise matrices dictates the following:
+\begin{theorem}
+For a matrix to be considered consistent, the following must hold true:
+
+For each element $a_{ij}$, $a_{ij}=a_{ik}*a_{kj}$, for all $i,j,k$ $\{1,\dots,n\}$. If $a_{ij}!=a_{ik}*a_{kj}$, the matrix is not consistent.
+\end{theorem}
+
+A pairwise comparison matrix $A$ has the following properties:
+\begin{itemize}
+\item $A$ is \textit{square} ($n$x$n$).
+\item All elements on the diagonal of $A$ \textit{have a value of 1}.
+\item $A$ has the property where each element $a_{ij}$ has an element that is the \textit{reciprocal}, located at $a_{ji}$ as shown below:
+
+\begin{center}
+
+
+$
+\begin{bmatrix}
+    1 & a_{12} & a_{13} & \dots  & a_{1n} \\
+    \frac{1}{a_{12}} & 1 & a_{23} & \dots  & a_{2n} \\
+    \vdots & \vdots & \vdots & \ddots & a_{3n} \\
+    \frac{1}{a_{1n}} & \frac{1}{a_{2n}} & \frac{1}{a_{3n}} & \dots  & 1
+\end{bmatrix}
+$
+\end{center}
+
+\item $A$ is \textit{consistent}.  This means that for each element $a_{ij}$, $a_{ij}=a_{ik}*a_{kj}$.  For all $i,j,k$ $\{1,\dots,n\}$. If $a_{ij}!=a_{ik}*a_{kj}$, the matrix is not consistent.
+\end{itemize}
+
+\cite{saaty2000fundamentals}
+
+
 
 \section{Literature Review}
+
 %
 %\subsection{Subsection Title}
 Saaty
@@ -218,21 +276,6 @@ Saaty
 \section{Methodology}
 
 \subsection{Formation of Consistent Matrix}
-
-\subsection{Example}
-
-\subsection{Distance Calculation}
-%
-%\begin{theorem}\label{T:H}
-%    The number of maximum inconsistencies ($Mi$) in a \textit{PRM} (positive reciprocal matrix) is proportional to the size of matrix $M$.  The number of inconsistencies is determined by the following formula:
-%    
-%    \begin{equation}Mi = \frac{n(n+1)}{2}\end{equation}
-%\end{theorem}
-%
-%\begin{proof}
-%    There are those who might leave this proof to the reader... to do so would be inappropriate.
-%\end{proof}
-
 If $M$ is consistent, any row or column of $M$ may be selected such that:
 
 [$w_1$,$w_2$,...,$w_n$] = [$a_{11}$, $a_{21}$, $a_{31}$, ..., $a_n1$]
@@ -248,7 +291,7 @@ $\frac{w_i}{w_n}$ = $\frac{a_{1i}}{a_{ni}}$ which is in turn is equivalent to $\
 
 $\frac{a_{1n}}{a_{in}*a{ni}} = 1$
 
-which reduces to simply $a_{1n}$ since $\frac{a_{1n}}{1} = 1$
+which reduces to simply $a_{1n}$, since $\frac{a_{1n}}{1} = 1$
 
 ${a_{in}*a_{ni}}$ is always 1 via the properties of pairwise matrices.
 
@@ -259,6 +302,24 @@ Let $M'$ to be the $M'<W>$ where $\|M-W\|$ is smallest.
 %In more than one dimension, the analogue to Hamburger's theorem has a slightly more complicated expression.  The full proof
 %may be found in \cite{F}.
 
+\subsection{Computation of Distance}
+
+\subsection{Example}
+
+\subsection{Alternate Methodology}
+%
+%\begin{theorem}\label{T:H}
+%    The number of maximum inconsistencies ($Mi$) in a \textit{PRM} (positive reciprocal matrix) is proportional to the size of matrix $M$.  The number of inconsistencies is determined by the following formula:
+%    
+%    \begin{equation}Mi = \frac{n(n+1)}{2}\end{equation}
+%\end{theorem}
+%
+%\begin{proof}
+%    There are those who might leave this proof to the reader... to do so would be inappropriate.
+%\end{proof}
+
+
+
 
 
 \section{Results}
@@ -267,25 +328,10 @@ Consider addressing what the next person to work in this area might tackle.
 
 \section{Conclusion}
 
-Here is more stuff.
+Here is more stuff where I prove that this paper has something worthwhile inside of it.
 
-\begin{thebibliography}{9}
-    \bibitem{A} \textsc{Akhiezer, N.I.}  \emph{The Classical Moment Problem and Some Related Questions in Analysis},
-        Oliver and Boyd, Edinburgh, 1965.
-    \bibitem{F} \textsc{Fuglede, B.}  The Multidimensional Moment Problem, \emph{Expo. Math.} 1 (1983), 47-65.
-    \bibitem{PS2} \textsc{Powers, V. and Scheiderer, C.}, Correction to the paper ``The Moment Problem for Non-compact
-        Semialgebraic Sets'', to appear, \emph{Adv. Geom.}
-    \bibitem{R2} \textsc{Riesz, M.}, Sur le probl\`eme des moments, Deuxi\`eme note, \emph{Ark. Mat. Astr. Fys.} 16,
-        no. 19 (1922), 1-21.
-    \bibitem{R3} \textsc{Riesz, M.}, Sur le probl\`eme des moments, Troisi\`eme note, \emph{Ark. Mat. Astr. Fys.} 17,
-        no. 16 (1923), 1-52.
-    \bibitem{Sai} \textsc{Saitoh, S.},  \emph{Theory of Reproducing Kernels and Its Applications}, Longman Scientific and
-        Technical, Harlow Essex, 1988.
-    \bibitem{S2} \textsc{Simon, B.}, \emph{Orthogonal Polynomials on the Unit Circle: Part 1: Classical Theory; Part 2:
-        Spectral Theory}, American Mathematical Society, Providence, 2004.
-    \bibitem{V1} \textsc{Vasilescu, F.-H.}, Hamburger and Stieltjes Moment Problems in Several Variables, \emph{Trans.
-        Amer. Math. Soc.} 354 (2002), 1265-1278.
-\end{thebibliography}
+\bibliographystyle{acm}
+\bibliography{thesis}
 
 
 
