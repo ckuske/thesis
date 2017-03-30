@@ -23,12 +23,44 @@
 # diagrams - show when an inconsistency introduced, which items are
 # affected (xfig, omnigraffle) 'include graphics' command in LaTeX
 
+# 543
+# pip
+# install
+# pylatex
+# 544
+# sudo
+# pip
+# install
+# pylatex
+# 545
+# sudo
+# pip
+# install
+# pylatex[matrices]
+# 546
+# sudo
+# pip
+# install
+# matplotlib
+# 547
+# sudo
+# pip
+# install
+# quantities
+
 import sys
 import copy
 import fractions
 import random
 
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')  # Not to use X server. For TravisCI.
+import matplotlib.pyplot as plt  # noqa
+
+from pylatex import Document, Section, Subsection, Tabular, Math, TikZ, Axis, \
+    Plot, Figure, Matrix
+from pylatex.utils import italic
 
 dataList = []  # list of lists
 matrixSquares = []
@@ -497,7 +529,7 @@ def Search1():
         print ""
 
         resultLists = []
-        myList = [1, 1, 1, 1]
+        myList = ['1', '1', '1', '1']
         for i in range(1, 1000):
 
             distanceDelta = -1
@@ -505,7 +537,7 @@ def Search1():
             slotsToRevert = []
             for listIdx in range(0, len(myList)):
 
-                myList[listIdx] = myList[listIdx] + 1
+                myList[listIdx] = str(int(myList[listIdx]) + 1)
                 mPrime = generate_consistent_matrix(myList, len(myList))
                 mPrimeSum = mPrime.get_sum_above_diagonal()
 
@@ -519,7 +551,7 @@ def Search1():
                     distanceDelta = results[0]
                     bestPosition = listIdx
                 elif myList[listIdx] > 1:  # don't go below 0!
-                    myList[listIdx] = myList[listIdx] - 1
+                    myList[listIdx] = str(int(myList[listIdx]) - 1)
 
             # save the best in this iteration
             if len(resultLists) > 0:
@@ -601,6 +633,41 @@ def Search2():
     print "Distance from m: " + str(solutionDistance)
     print "Sum: " + str(solutionMatrix.get_sum_above_diagonal())
 
+def stuff(fname, width, *args, **kwargs):
+
+    x = [0, 1, 2, 3, 4, 5, 6]
+    y = [15, 2, 7, 1, 5, 6, 9]
+
+    plt.plot(x, y)
+
+    geometry_options = {"tmargin": "1cm", "lmargin": "10cm"}
+    doc = Document(geometry_options=geometry_options)
+    #with doc.create(Subsection('Beautiful graphs')):
+    with doc.create(TikZ()):
+        plot_options = 'height=6cm, width=6cm, grid=major'
+        with doc.create(Axis(options=plot_options)) as plot:
+            #plot.append(Plot(name='model', func='-x^5 - 242'))
+
+            coordinates = [
+                (-4.77778, 2027.60977),
+                (-3.55556, 347.84069),
+                (-2.33333, 22.58953),
+                (-1.11111, -493.50066),
+                (0.11111, 46.66082),
+                (1.33333, -205.56286),
+                (2.55556, -341.40638),
+                (3.77778, -1169.24780),
+                (5.00000, -3269.56775),
+            ]
+
+            plot.append(Plot(name='estimate', coordinates=coordinates))
+    print doc.dumps_content()
 if __name__ == "__main__":
     verboseCount = 0
-    Search2()
+    rowColumnMethodData = []
+    geometricMeanMethodData = []
+    randomIterationMethodData = []
+    #Search1()
+    stuff('matplotlib_ex-dpi', r'1\textwidth', dpi=300)
+    #stuff('matplotlib_ex-facecolor', r'0.5\textwidth', facecolor='b')
+
