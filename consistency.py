@@ -52,6 +52,7 @@ import sys
 import copy
 import fractions
 import random
+import time
 
 import numpy as np
 import matplotlib
@@ -577,61 +578,75 @@ def Search1():
             print "------------------------------------------"
 
 
-def Search2():
-    myList = [2,3,4]
+def Search2(resultsData, iterations):
+    minSize = 3
+    batchStartTime = time.time()
+    for i in range(minSize, iterations+minSize):
+        #myList = [2,3,4]
 
-    #/m = generate_random_matrix(len(myList))
-    m = PairwiseMatrix()
-    m.add_matrix_row(['1', '2', '3'])
-    m.add_matrix_row(['1/2', '1', '4'])
-    m.add_matrix_row(['1/3', '1/4', '1'])
-    mSum = m.get_sum_above_diagonal()
-    print "Matrix: "
-    m.print_matrix()
-    print "Matrix Sum: " + str(mSum)
-    print ""
-
-    bestSolutionDistance = sys.maxint
-    bestSolutionSet = []
-
-    for columnIdx in range(0, len(myList)):
-        columnData = m.get_column(columnIdx)
-        mPrime = generate_consistent_matrix(columnData, len(columnData))
-        results = mPrime.get_distance(m)
-        calculatedDistance = results[0]
-        if calculatedDistance < bestSolutionDistance:
-            bestSolutionDistance = calculatedDistance
-            bestSolutionSet = copy.copy(columnData)
-
-        print "Potential Solution Set: " + str(columnData)
-        mPrime.print_matrix(True)
-        print "Distance from m: " + str(calculatedDistance)
-        print "Sum: " + str(mPrime.get_sum_above_diagonal())
+        iterStartTime = time.time()
+        m = generate_random_matrix(i)
+        # m = PairwiseMatrix()
+        # m.add_matrix_row(['1', '2', '3'])
+        # m.add_matrix_row(['1/2', '1', '4'])
+        # m.add_matrix_row(['1/3', '1/4', '1'])
+        mSum = m.get_sum_above_diagonal()
+        print "Matrix: "
+        m.print_matrix()
+        print m.check_matrix_consistency()
+        print "Matrix Sum: " + str(mSum)
         print ""
 
-    for rowIdx in range(0, len(myList)):
-        rowData = m.get_row(rowIdx)
-        mPrime = generate_consistent_matrix(rowData, len(rowData))
-        results = mPrime.get_distance(m)
-        calculatedDistance = results[0]
-        if calculatedDistance < bestSolutionDistance:
-            bestSolutionDistance = calculatedDistance
-            bestSolutionSet = copy.copy(columnData)
-        print "Potential Solution Set: " + str(rowData)
-        mPrime.print_matrix(True)
-        print "Distance from m: " + str(calculatedDistance)
-        print "Sum: " + str(mPrime.get_sum_above_diagonal())
+        bestSolutionDistance = sys.maxint
+        bestSolutionSet = []
 
-    print ""
-    print "-= Best Solution =-"
-    print "Solution Set: " + str(bestSolutionSet)
-    print "Derived Matrix"
-    solutionMatrix = generate_consistent_matrix(bestSolutionSet, len(bestSolutionSet))
-    solutionMatrix.print_matrix(True)
-    solutionResults = solutionMatrix.get_distance(m)
-    solutionDistance = solutionResults[0]
-    print "Distance from m: " + str(solutionDistance)
-    print "Sum: " + str(solutionMatrix.get_sum_above_diagonal())
+        for columnIdx in range(0, i):
+            columnData = m.get_column(columnIdx)
+            mPrime = generate_consistent_matrix(columnData, len(columnData))
+            results = mPrime.get_distance(m)
+            calculatedDistance = results[0]
+            if calculatedDistance < bestSolutionDistance:
+                bestSolutionDistance = calculatedDistance
+                bestSolutionSet = copy.copy(columnData)
+
+            print "Potential Solution Set: " + str(columnData)
+            mPrime.print_matrix(True)
+            print "Distance from m: " + str(calculatedDistance)
+            print "Sum: " + str(mPrime.get_sum_above_diagonal())
+            print ""
+
+        for rowIdx in range(0, i):
+            rowData = m.get_row(rowIdx)
+            mPrime = generate_consistent_matrix(rowData, len(rowData))
+            results = mPrime.get_distance(m)
+            calculatedDistance = results[0]
+            if calculatedDistance < bestSolutionDistance:
+                bestSolutionDistance = calculatedDistance
+                bestSolutionSet = copy.copy(columnData)
+            print "Potential Solution Set: " + str(rowData)
+            mPrime.print_matrix(True)
+            print "Distance from m: " + str(calculatedDistance)
+            print "Sum: " + str(mPrime.get_sum_above_diagonal())
+
+        print ""
+        print "-= Best Solution =-"
+        print "Solution Set: " + str(bestSolutionSet)
+        print "Derived Matrix"
+        solutionMatrix = generate_consistent_matrix(bestSolutionSet, len(bestSolutionSet))
+        solutionMatrix.print_matrix(True)
+        solutionResults = solutionMatrix.get_distance(m)
+        solutionDistance = solutionResults[0]
+        print "Distance from m: " + str(solutionDistance)
+        print "Sum: " + str(solutionMatrix.get_sum_above_diagonal())
+
+        iterDuration = time.time() - iterStartTime
+
+        t = (i, copy.deepcopy(solutionMatrix), solutionDistance, iterDuration)
+        print t
+        resultsData.append(t)
+
+    resultsData.append((-1, 0, 0, time.time() - batchStartTime))
+    return resultsData
 
 def stuff(fname, width, *args, **kwargs):
 
@@ -668,6 +683,8 @@ if __name__ == "__main__":
     geometricMeanMethodData = []
     randomIterationMethodData = []
     #Search1()
-    stuff('matplotlib_ex-dpi', r'1\textwidth', dpi=300)
+    rowColumnMethodData = Search2(rowColumnMethodData,1)
+    print rowColumnMethodData
+    #stuff('matplotlib_ex-dpi', r'1\textwidth', dpi=300)
     #stuff('matplotlib_ex-facecolor', r'0.5\textwidth', facecolor='b')
 
