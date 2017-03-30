@@ -40,6 +40,10 @@
 
 
 \usepackage{amssymb,mathtools,latexsym,amsmath,amsthm,amsfonts,graphics,kbordermatrix}
+\usepackage{tikz}%
+\usepackage{pgfplots}%
+\pgfplotsset{compat=newest}%
+
 \newcommand\Month{%
 \ifcase\number\month\relax%
 \or January\or February\or March\or April\or May\or June%
@@ -210,27 +214,25 @@ Over the past few decades, pairwise comparisons and the Analytical Hierarchical 
 
 In pairwise matrices, each criterion has a relative rank.  Consider the following pairwise matrix $A$:
 \begin{center}
-$
-\begin{bmatrix}
-    1    & 2   & 10 \\
-    1/2  & 1   & 5 \\
-    1/10 & 1/5 & 1 
-\end{bmatrix}
-$
-
-
+% $
+% \begin{bmatrix}
+%     1    & 2   & 10 \\
+%     1/2  & 1   & 5 \\
+%     1/10 & 1/5 & 1 
+% \end{bmatrix}
+% $
 \[
 \kbordermatrix{
-    & c_1 & c_2 & c_3 \\
-    r_1 & 1 & 1 & 1 \\
-    r_2 & 0 & 1 & 0  \\
-    r_3 & 0 & 0 & 1 
+    & Apple & Banana & Cherry \\
+    Apple & 1 & 2 & 10 \\
+    Banana & 1/2 & 1 & 5  \\
+    Cherry & 1/10 & 1/5 & 1 
   }
 \]
 
 \end{center}
 
-Remembering that the criterion are the elements above the diagonal, the first line indicates that criterion $A_{13}$ is preferred ten times over element $A_{12}$, and element $A_{23}$ is preferred five times over criterion $A_{13}$.
+Remembering that the criterion are the elements above the diagonal, the first line indicates that bananas are preferred twice over apples.  times over bananas, and bananas are preferred five times over criterion cherries.
 
 When decision makers are trying to make their evaluation(s), they will often bring in subject matter experts \textit{(SMEs)} to help develop the relative rankings of how one preference should be ranked compared to another.  When these experts define their preferences in a pairwise matrix, they often generate matrices that do not meet the criteria for consistency.
 
@@ -258,7 +260,14 @@ $
     \frac{1}{a_{1n}} & \frac{1}{a_{2n}} & \frac{1}{a_{3n}} & \dots  & 1
 \end{bmatrix}
 $
+
+\input{graphData.tex}
+
+
+
 \end{center}
+
+
 
 \item $A$ is \textit{consistent}.  This means that for each element $a_{ij}$, $a_{ij}=a_{ik}*a_{kj}$.  For all $i,j,k$ $\{1,\dots,n\}$. If $a_{ij}!=a_{ik}*a_{kj}$, the matrix is not consistent.
 \end{itemize}
@@ -268,14 +277,11 @@ $
 
 
 \section{Literature Review}
-
-%
-%\subsection{Subsection Title}
-Saaty
+In the 1980's, Saaty \cite{saaty2000fundamentals} wrote \textit{Fundamentals of Decision Making and Priority Theory With the Analytic Hierarchy Process} which started research in this field.  In this paper, 
 
 \section{Methodology}
 
-\subsection{Formation of Consistent Matrix}~\\
+\subsection{Formation of Consistent Matrix}
 If $M$ is consistent, any row or column of $M$ may be selected such that:
 
 [$w_1$,$w_2$,...,$w_n$] = [$a_{11}$, $a_{21}$, $a_{31}$, ..., $a_n1$]
@@ -336,4 +342,3 @@ Here is more stuff where I prove that this paper has something worthwhile inside
 
 
 \end{document}
-
