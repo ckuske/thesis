@@ -227,8 +227,21 @@ def make_all_ones_matrix(matrix_size):
 
     return m
 
-
 def generate_random_matrix(matrix_size):
+    l = np.random.randint(2, pow(matrix_size, 3), size=(matrix_size, matrix_size))
+    m = PairwiseMatrix(make_all_ones_matrix(matrix_size))
+
+    # matrix_elements = m.get_elements_below_diagonal()
+    for i in range(0, matrix_size):
+        for j in range(0, matrix_size):
+            if i == j:
+                continue
+            m.set_item(j, i, str(l[i][i]))
+            m.set_item(i, j, '1/' + str(l[i][i]))
+
+    return m
+
+def generate_random_consistent_matrix(matrix_size):
     l = np.random.randint(2, pow(matrix_size, 3), size=(matrix_size, matrix_size))
     m = PairwiseMatrix(make_all_ones_matrix(matrix_size))
 
