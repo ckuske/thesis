@@ -53,7 +53,8 @@ import copy
 import fractions
 import random
 import time
-
+import threading
+from multiprocessing import Process
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')  # Not to use X server. For TravisCI.
@@ -591,10 +592,9 @@ def Search1():
             print "------------------------------------------"
 
 
-def Search2(resultsData, iterations):
-    minSize = 3
+def Search2(resultsData, startIdx, endIdx):
     batchStartTime = time.time()
-    for i in range(minSize, iterations+minSize):
+    for i in range(startIdx, endIdx):
         #myList = [2,3,4]
 
         iterStartTime = time.time()
@@ -604,11 +604,11 @@ def Search2(resultsData, iterations):
         # m.add_matrix_row(['1/2', '1', '4'])
         # m.add_matrix_row(['1/3', '1/4', '1'])
         mSum = m.get_sum_above_diagonal()
-        print "Matrix: "
-        m.print_matrix()
-        print m.check_matrix_consistency()
-        print "Matrix Sum: " + str(mSum)
-        print ""
+        # print "Matrix: "
+        # m.print_matrix()
+        # print m.check_matrix_consistency()
+        # print "Matrix Sum: " + str(mSum)
+        # print ""
 
         bestSolutionDistance = sys.maxint
         bestSolutionSet = []
@@ -622,11 +622,11 @@ def Search2(resultsData, iterations):
                 bestSolutionDistance = calculatedDistance
                 bestSolutionSet = copy.copy(columnData)
 
-            print "Potential Solution Set: " + str(columnData)
-            mPrime.print_matrix(True)
-            print "Distance from m: " + str(calculatedDistance)
-            print "Sum: " + str(mPrime.get_sum_above_diagonal())
-            print ""
+            # print "Potential Solution Set: " + str(columnData)
+            # mPrime.print_matrix(True)
+            # print "Distance from m: " + str(calculatedDistance)
+            # print "Sum: " + str(mPrime.get_sum_above_diagonal())
+            # print ""
 
         for rowIdx in range(0, i):
             rowData = m.get_row(rowIdx)
@@ -636,26 +636,26 @@ def Search2(resultsData, iterations):
             if calculatedDistance < bestSolutionDistance:
                 bestSolutionDistance = calculatedDistance
                 bestSolutionSet = copy.copy(columnData)
-            print "Potential Solution Set: " + str(rowData)
-            mPrime.print_matrix(True)
-            print "Distance from m: " + str(calculatedDistance)
-            print "Sum: " + str(mPrime.get_sum_above_diagonal())
+            # print "Potential Solution Set: " + str(rowData)
+            # mPrime.print_matrix(True)
+            # print "Distance from m: " + str(calculatedDistance)
+            # print "Sum: " + str(mPrime.get_sum_above_diagonal())
 
-        print ""
-        print "-= Best Solution =-"
-        print "Solution Set: " + str(bestSolutionSet)
-        print "Derived Matrix"
+        # print ""
+        # print "-= Best Solution =-"
+        # print "Solution Set: " + str(bestSolutionSet)
+        # print "Derived Matrix"
         solutionMatrix = generate_consistent_matrix(bestSolutionSet, len(bestSolutionSet))
-        solutionMatrix.print_matrix(True)
+        # solutionMatrix.print_matrix(True)
         solutionResults = solutionMatrix.get_distance(m)
         solutionDistance = solutionResults[0]
-        print "Distance from m: " + str(solutionDistance)
-        print "Sum: " + str(solutionMatrix.get_sum_above_diagonal())
+        # print "Distance from m: " + str(solutionDistance)
+        # print "Sum: " + str(solutionMatrix.get_sum_above_diagonal())
 
         iterDuration = time.time() - iterStartTime
 
         t = (i, copy.deepcopy(solutionMatrix), solutionDistance, iterDuration)
-        print t
+        #print t
         resultsData.append(t)
 
     resultsData.append((-1, 0, 0, time.time() - batchStartTime))
@@ -692,12 +692,30 @@ def stuff(fname, width, *args, **kwargs):
     print doc.dumps_content()
 if __name__ == "__main__":
     verboseCount = 0
+    coresToUse = 6
     rowColumnMethodData = []
     geometricMeanMethodData = []
     randomIterationMethodData = []
-    #Search1()
-    rowColumnMethodData = Search2(rowColumnMethodData,1)
-    print rowColumnMethodData
+    for j in range(0,50):
+        threads = []
+        #rowColumnMethodData = Search2(rowColumnMethodData, 3, 4)
+        for i in range(0, coresToUse):
+            p = Process(target=Search2, args=(rowColumnMethodData, 3, 4,))
+            threads.append(p)
+            p.start()
+            # t = threading.Thread(target=Search2, args=(rowColumnMethodData, 3, 100,))
+            # threads.append(t)
+            # t.start()
+        for i in range(0,len(threads)):
+            threads[i].join()
+        # main_thread = threading.currentThread()
+        # for t in threading.enumerate():
+        #     if t is main_thread:
+        #         continue
+        #     print 'joining ', t.getName()
+        #     t.join()
+
+    print 'Data: ' + str(rowColumnMethodData)
     #stuff('matplotlib_ex-dpi', r'1\textwidth', dpi=300)
     #stuff('matplotlib_ex-facecolor', r'0.5\textwidth', facecolor='b')
 
